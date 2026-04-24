@@ -1,0 +1,18 @@
+# Task 3 - PDF Text Extraction Evidence
+
+## Verification Results
+
+### sample_guide.pdf
+- **Expected**: pdfplumber extracts >50 characters
+- **Actual**: 490 characters extracted
+- **Status**: PASS
+
+### sample_guide_scanned.pdf
+- **Expected**: pdfplumber extracts 0 characters (image-only scanned PDF)
+- **Actual**: 0 characters extracted
+- **Status**: PASS (correctly detected as scanned)
+
+## Summary
+- sample_guide.pdf: 490 chars > 50 → PASS
+- sample_guide_scanned.pdf: 0 chars = 0 → PASS
+- Scanned detection works correctly
