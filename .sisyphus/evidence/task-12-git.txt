@@ -1,0 +1,4 @@
+Repository: lab-report
+Action: Initial commit for lab-report/scripts/init_project.py
+Commit message: feat(scripts): add project initialization orchestration script
+Files: lab-report/lab-report/scripts/init_project.py

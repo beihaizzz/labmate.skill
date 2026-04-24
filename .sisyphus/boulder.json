@@ -27,6 +27,15 @@
       "agent": "Sisyphus-Junior",
       "category": "quick",
       "updated_at": "2026-04-24T10:39:37.002Z"
+    },
+    "todo:8": {
+      "task_key": "todo:8",
+      "task_label": "8",
+      "task_title": "parse_pdf.py — PDF 文本提取脚本",
+      "session_id": "ses_240ec5ce7ffenjCTmgY3Dge0gD",
+      "agent": "Sisyphus-Junior",
+      "category": "deep",
+      "updated_at": "2026-04-24T10:56:43.558Z"
     }
   }
 }

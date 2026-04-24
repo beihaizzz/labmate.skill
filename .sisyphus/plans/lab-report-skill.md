@@ -628,7 +628,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
   - Message: `feat(scripts): add student info discovery and creation script`
   - Files: `scripts/student_info.py`
 
-- [ ] 8. parse_pdf.py — PDF 文本提取脚本
+- [x] 8. parse_pdf.py — PDF 文本提取脚本
 
   **What to do**:
   - 创建 `lab-report/scripts/parse_pdf.py`
@@ -676,7 +676,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
 
   **Commit**: YES | Message: `feat(scripts): add PDF text extraction and scanned detection`
 
-- [ ] 9. parse_docx.py — Word 文档解析脚本
+- [x] 9. parse_docx.py — Word 文档解析脚本
 
   **What to do**:
   - 创建 `lab-report/scripts/parse_docx.py`
@@ -711,7 +711,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
 
   **Commit**: YES | Message: `feat(scripts): add DOCX parsing with placeholder detection`
 
-- [ ] 10. parse_pptx.py — PPT 文本提取脚本
+- [x] 10. parse_pptx.py — PPT 文本提取脚本
 
   **What to do**:
   - 创建 `lab-report/scripts/parse_pptx.py`
@@ -745,7 +745,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
 
   **Commit**: YES | Message: `feat(scripts): add PPTX text extraction script`
 
-- [ ] 11. progress_manager.py — JSON 进度管理脚本
+- [x] 11. progress_manager.py — JSON 进度管理脚本
 
   **What to do**:
   - 创建 `lab-report/scripts/progress_manager.py`
@@ -785,7 +785,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
 
   **Commit**: YES | Message: `feat(scripts): add JSON progress state manager`
 
-- [ ] 12. init_project.py — 项目初始化主逻辑
+- [x] 12. init_project.py — 项目初始化主逻辑
 
   **What to do**:
   - 创建 `lab-report/scripts/init_project.py`
@@ -849,7 +849,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
 
   **Commit**: YES | Message: `feat(scripts): add project initialization orchestration script`
 
-- [ ] 13. fill_template.py — docxtpl 模板填空脚本
+- [x] 13. fill_template.py — docxtpl 模板填空脚本
 
   **What to do**:
   - 创建 `lab-report/scripts/fill_template.py`
@@ -936,7 +936,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
 
   **Commit**: YES | Message: `feat(scripts): add docxtpl-based template filling with CJK and de-AI support`
 
-- [ ] 14. git_manager.py — Git 自动提交脚本
+- [x] 14. git_manager.py — Git 自动提交脚本
 
   **What to do**:
   - 创建 `lab-report/scripts/git_manager.py`
@@ -984,7 +984,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
 
   **Commit**: YES | Message: `feat(scripts): add git auto-commit manager`
 
-- [ ] 15. SKILL.md — 主 Skill 定义文件
+- [x] 15. SKILL.md — 主 Skill 定义文件
 
   **What to do**:
   - 创建 `lab-report/SKILL.md`
@@ -1047,7 +1047,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
 
   **Commit**: YES | Message: `docs: add main SKILL.md with Guide and Work mode workflows`
 
-- [ ] 16. references/guide-mode-workflow.md
+- [x] 16. references/guide-mode-workflow.md
 
   **What to do**:
   - 创建 `lab-report/references/guide-mode-workflow.md`
@@ -1069,7 +1069,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
 
   **Commit**: YES | Message: `docs: add Guide Mode detailed workflow reference`
 
-- [ ] 17. references/work-mode-workflow.md
+- [x] 17. references/work-mode-workflow.md
 
   **What to do**:
   - 创建 `lab-report/references/work-mode-workflow.md`
@@ -1089,7 +1089,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
 
   **Commit**: YES | Message: `docs: add Work Mode detailed workflow reference`
 
-- [ ] 18. references/template-patterns.md
+- [x] 18. references/template-patterns.md
 
   **What to do**:
   - 创建 `lab-report/references/template-patterns.md`
@@ -1105,7 +1105,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
 
   **Commit**: YES | Message: `docs: add template pattern and CJK font reference`
 
-- [ ] 19. references/de-ai-style-guide.md
+- [x] 19. references/de-ai-style-guide.md
 
   **What to do**:
   - 创建 `lab-report/references/de-ai-style-guide.md`
@@ -1122,7 +1122,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
 
   **Commit**: YES | Message: `docs: add de-AI writing style guide`
 
-- [ ] 20. references/report-structure.md
+- [x] 20. references/report-structure.md
 
   **What to do**:
   - 创建 `lab-report/references/report-structure.md`
@@ -1143,7 +1143,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
 
   **Commit**: YES | Message: `docs: add standard lab report structure reference`
 
-- [ ] 21. assets/学生信息模板.md
+- [x] 21. assets/学生信息模板.md
 
   **What to do**:
   - 创建 `lab-report/assets/学生信息模板.md`
@@ -1166,7 +1166,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
 
   **Commit**: YES | Message: `feat(assets): add student info markdown template`
 
-- [ ] 22. assets/report_template.docx
+- [x] 22. assets/report_template.docx
 
   **What to do**:
   - 创建 `lab-report/assets/report_template.docx` — 默认实验报告模板
@@ -1201,7 +1201,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
 
   **Commit**: YES | Message: `feat(assets): add default lab report DOCX template`
 
-- [ ] 23. Unit tests — parse_* scripts
+- [x] 23. Unit tests — parse_* scripts
 
   **What to do**:
   - 创建 `tests/test_parse_pdf.py`, `tests/test_parse_docx.py`, `tests/test_parse_pptx.py`
@@ -1242,7 +1242,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
 
   **Commit**: YES | Message: `test: add unit tests for PDF, DOCX, and PPTX parsers`
 
-- [ ] 24. Unit tests — fill_template.py + init_project.py
+- [x] 24. Unit tests — fill_template.py + init_project.py
 
   **What to do**:
   - 创建 `tests/test_fill_template.py`, `tests/test_init_project.py`
@@ -1281,7 +1281,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
 
   **Commit**: YES | Message: `test: add unit tests for template filling and project init`
 
-- [ ] 25. Unit tests — progress_manager.py + student_info.py + git_manager.py
+- [x] 25. Unit tests — progress_manager.py + student_info.py + git_manager.py
 
   **What to do**:
   - 创建 `tests/test_progress_manager.py`, `tests/test_student_info.py`, `tests/test_git_manager.py`

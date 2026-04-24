@@ -1,0 +1,110 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.12.8, pytest-9.0.3, pluggy-1.6.0 -- E:\lab-report\lab-report\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: E:\lab-report\lab-report
+configfile: pyproject.toml
+collecting ... collected 27 items
+
+tests/test_check_deps.py::TestJsonOutput::test_json_output PASSED        [  3%]
+tests/test_fill_template.py::TestPlaceholderReplacement::test_placeholder_replacement PASSED [  7%]
+tests/test_fill_template.py::TestOriginalPreserved::test_original_preserved PASSED [ 11%]
+tests/test_fill_template.py::TestFileNotFound::test_file_not_found PASSED [ 14%]
+tests/test_git_manager.py::TestNonGitDir::test_non_git_dir PASSED        [ 18%]
+tests/test_init_project.py::TestDiscoverFiles::test_discover_files PASSED [ 22%]
+tests/test_init_project.py::TestEmptyDir::test_empty_dir PASSED          [ 25%]
+tests/test_init_project.py::TestLabReportDir::test_lab_report_dir PASSED [ 29%]
+tests/test_init_project.py::TestCliWithDir::test_cli_with_dir PASSED     [ 33%]
+tests/test_parse_docx.py::TestPlaceholderDetection::test_placeholder_detection PASSED [ 37%]
+tests/test_parse_docx.py::TestTableExtraction::test_table_extraction PASSED [ 40%]
+tests/test_parse_docx.py::TestFileNotFound::test_file_not_found PASSED   [ 44%]
+tests/test_parse_pdf.py::TestParseNormalPdf::test_parse_normal_pdf PASSED [ 48%]
+tests/test_parse_pdf.py::TestDetectScannedPdf::test_detect_scanned_pdf PASSED [ 51%]
+tests/test_parse_pdf.py::TestJsonOutput::test_json_output PASSED         [ 55%]
+tests/test_parse_pdf.py::TestMarkdownOutput::test_markdown_output PASSED [ 59%]
+tests/test_parse_pdf.py::TestFileNotFound::test_file_not_found PASSED    [ 62%]
+tests/test_parse_pptx.py::TestSlideCount::test_slide_count PASSED        [ 66%]
+tests/test_parse_pptx.py::TestJsonOutput::test_json_output PASSED        [ 70%]
+tests/test_parse_pptx.py::TestFileNotFound::test_file_not_found PASSED   [ 74%]
+tests/test_progress_manager.py::TestInitProgress::test_init_progress PASSED [ 77%]
+tests/test_progress_manager.py::TestUpdateStep::test_update_step PASSED  [ 81%]
+tests/test_progress_manager.py::TestReset::test_reset PASSED             [ 85%]
+tests/test_student_info.py::TestDiscoverStudentInfo::test_discover_student_info PASSED [ 88%]
+tests/test_student_info.py::TestDiscoverStudentInfo::test_json_output_cli PASSED [ 92%]
+tests/test_student_info.py::TestNotFound::test_not_found PASSED          [ 96%]
+tests/test_student_info.py::TestNotFound::test_cli_not_found PASSED      [100%]
+
+============================== warnings summary ===============================
+tests/test_parse_pdf.py::TestParseNormalPdf::test_parse_normal_pdf
+  E:\lab-report\lab-report\.venv\Lib\site-packages\_pytest\threadexception.py:58: PytestUnhandledThreadExceptionWarning: Exception in thread Thread-18 (_readerthread)
+  
+  Traceback (most recent call last):
+    File "E:\python3.12.8\Lib\threading.py", line 1075, in _bootstrap_inner
+      self.run()
+    File "E:\python3.12.8\Lib\threading.py", line 1012, in run
+      self._target(*self._args, **self._kwargs)
+    File "E:\python3.12.8\Lib\subprocess.py", line 1599, in _readerthread
+      buffer.append(fh.read())
+                    ^^^^^^^^^
+    File "<frozen codecs>", line 322, in decode
+  UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd0 in position 0: invalid continuation byte
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    warnings.warn(pytest.PytestUnhandledThreadExceptionWarning(msg))
+
+tests/test_parse_pdf.py::TestParseNormalPdf::test_parse_normal_pdf
+  E:\lab-report\lab-report\.venv\Lib\site-packages\_pytest\threadexception.py:58: PytestUnhandledThreadExceptionWarning: Exception in thread Thread-16 (_readerthread)
+  
+  Traceback (most recent call last):
+    File "E:\python3.12.8\Lib\threading.py", line 1075, in _bootstrap_inner
+      self.run()
+    File "E:\python3.12.8\Lib\threading.py", line 1012, in run
+      self._target(*self._args, **self._kwargs)
+    File "E:\python3.12.8\Lib\subprocess.py", line 1599, in _readerthread
+      buffer.append(fh.read())
+                    ^^^^^^^^^
+    File "<frozen codecs>", line 322, in decode
+  UnicodeDecodeError: 'utf-8' codec can't decode byte 0xb2 in position 12: invalid start byte
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    warnings.warn(pytest.PytestUnhandledThreadExceptionWarning(msg))
+
+tests/test_parse_pdf.py::TestDetectScannedPdf::test_detect_scanned_pdf
+  E:\lab-report\lab-report\.venv\Lib\site-packages\_pytest\threadexception.py:58: PytestUnhandledThreadExceptionWarning: Exception in thread Thread-22 (_readerthread)
+  
+  Traceback (most recent call last):
+    File "E:\python3.12.8\Lib\threading.py", line 1075, in _bootstrap_inner
+      self.run()
+    File "E:\python3.12.8\Lib\threading.py", line 1012, in run
+      self._target(*self._args, **self._kwargs)
+    File "E:\python3.12.8\Lib\subprocess.py", line 1599, in _readerthread
+      buffer.append(fh.read())
+                    ^^^^^^^^^
+    File "<frozen codecs>", line 322, in decode
+  UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd0 in position 0: invalid continuation byte
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    warnings.warn(pytest.PytestUnhandledThreadExceptionWarning(msg))
+
+tests/test_parse_pdf.py::TestDetectScannedPdf::test_detect_scanned_pdf
+  E:\lab-report\lab-report\.venv\Lib\site-packages\_pytest\threadexception.py:58: PytestUnhandledThreadExceptionWarning: Exception in thread Thread-20 (_readerthread)
+  
+  Traceback (most recent call last):
+    File "E:\python3.12.8\Lib\threading.py", line 1075, in _bootstrap_inner
+      self.run()
+    File "E:\python3.12.8\Lib\threading.py", line 1012, in run
+      self._target(*self._args, **self._kwargs)
+    File "E:\python3.12.8\Lib\subprocess.py", line 1599, in _readerthread
+      buffer.append(fh.read())
+                    ^^^^^^^^^
+    File "<frozen codecs>", line 322, in decode
+  UnicodeDecodeError: 'utf-8' codec can't decode byte 0xb2 in position 12: invalid start byte
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    warnings.warn(pytest.PytestUnhandledThreadExceptionWarning(msg))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 27 passed, 4 warnings in 10.11s =======================

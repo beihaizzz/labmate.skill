@@ -1,0 +1,6 @@
+{
+  "task": "init_project.py",
+  "status": "completed",
+  "path": "lab-report/lab-report/scripts/init_project.py",
+  "summary": "Project initialization orchestration script added with dependency check, file discovery, student info discovery, .lab-report dir creation, optional progress init, and optional git initialization."
+}
