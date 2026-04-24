@@ -1,0 +1,19 @@
+PPTX Extraction Verification - Task 5
+======================================
+File: lab-report/tests/fixtures/sample_guide.pptx
+
+Results:
+- Slide count: 8 (>= 5 required) ✓
+- Total text: 554 chars (> 100 required) ✓
+- python-pptx can open and extract text: ✓
+
+Slides verified:
+1. Title: "实验一：RC电路研究"
+2. 实验目的 (4 bullet points)
+3. 实验原理 (text + shape placeholder)
+4-7. 实验步骤 (1/4 through 4/4)
+8. 注意事项 (4 warnings)
+
+Shape with text frame present: [电路示意图] placeholder rectangle
+
+All acceptance criteria met.

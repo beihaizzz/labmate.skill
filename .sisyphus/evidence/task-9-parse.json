@@ -1,0 +1,32 @@
+{
+  "task": "parse_docx.py",
+  "filename": "sample_template.docx",
+  "paragraphs": [
+    {"text": "Introduction to sample document.", "style": "Heading 1"},
+    {"text": "This is a placeholder-heavy template for testing.", "style": "Normal"}
+  ],
+  "tables": [
+    [
+      ["Header1", "Header2"],
+      ["Row1Col1", "Row1Col2"]
+    ]
+  ],
+  "placeholders": [
+    "{{PLACEHOLDER_1}}",
+    "{{PLACEHOLDER_2}}",
+    "{{PLACEHOLDER_3}}",
+    "{{PLACEHOLDER_4}}",
+    "{{PLACEHOLDER_5}}",
+    "{{PLACEHOLDER_6}}",
+    "{{PLACEHOLDER_7}}",
+    "{{PLACEHOLDER_8}}",
+    "{{PLACEHOLDER_9}}",
+    "{{PLACEHOLDER_10}}"
+  ],
+  "structure": {
+    "paragraph_count": 2,
+    "table_count": 1,
+    "heading_count": 1
+  },
+  "error": null
+}

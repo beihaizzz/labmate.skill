@@ -1,0 +1,32 @@
+{
+  "active_plan": "E:\\lab-report\\.sisyphus\\plans\\lab-report-skill.md",
+  "started_at": "2026-04-24T10:23:19.279Z",
+  "session_ids": [
+    "ses_24127170affeqZLEkZNWELxBuk"
+  ],
+  "session_origins": {
+    "ses_24127170affeqZLEkZNWELxBuk": "direct"
+  },
+  "plan_name": "lab-report-skill",
+  "agent": "atlas",
+  "task_sessions": {
+    "todo:1": {
+      "task_key": "todo:1",
+      "task_label": "1",
+      "task_title": "Project scaffolding + pyproject.toml",
+      "session_id": "ses_240fa3392ffeyXaXx1JN7drXF1",
+      "agent": "Sisyphus-Junior",
+      "category": "quick",
+      "updated_at": "2026-04-24T10:35:57.746Z"
+    },
+    "todo:6": {
+      "task_key": "todo:6",
+      "task_label": "6",
+      "task_title": "check_deps.py — 依赖预检脚本",
+      "session_id": "ses_240eeaf55fferiMXpLPJRFxgW2",
+      "agent": "Sisyphus-Junior",
+      "category": "quick",
+      "updated_at": "2026-04-24T10:39:37.002Z"
+    }
+  }
+}

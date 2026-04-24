@@ -1,0 +1,13 @@
+lab-report/
+├── .gitignore
+├── SKILL.md
+├── assets/
+├── pyproject.toml
+├── references/
+├── scripts/
+└── tests/
+    ├── conftest.py
+    └── fixtures/
+
+Total directories: 6
+Total files: 4

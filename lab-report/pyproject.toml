@@ -21,8 +21,7 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = []
-py-modules = []
+packages = ["scripts"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

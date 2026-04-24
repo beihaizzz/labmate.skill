@@ -1,0 +1,19 @@
+Test: student info discovery when file NOT found
+Working directory: E:/lab-report (clean, no 学生信息.md)
+
+Command: python scripts/student_info.py
+Expected: Not found message with hint to use --create
+Actual output:
+  学生信息.md not found
+  Run with --create to create a template
+
+Exit code: 0 (graceful - script exits 0 even when not found)
+
+Test: --create doesn't overwrite existing file
+Command: python scripts/student_info.py --create
+Expected: Warning message, exit code 1
+Actual output:
+  Warning: 学生信息.md already exists
+Exit code: 1
+
+Both tests passed.

@@ -1,0 +1,11 @@
+Dependencies in pyproject.toml:
+- python-docx
+- docxtpl
+- pdfplumber
+- python-pptx
+- pymupdf4llm
+
+Optional dev dependencies:
+- pytest
+
+All 5 required dependencies present: YES

@@ -1,0 +1,9 @@
+Lab-Report Dependency Check
+========================================
+✅ uv: uv 0.7.17 (41c218a89 2025-06-29)
+✅ python: 3.12.8
+✅ pdfplumber: available
+✅ python-docx: available
+✅ docxtpl: available
+✅ python-pptx: available
+Exit code: 0 (all dependencies satisfied)

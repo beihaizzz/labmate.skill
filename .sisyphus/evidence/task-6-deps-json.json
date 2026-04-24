@@ -1,0 +1,26 @@
+{
+  "uv": {
+    "ok": true,
+    "detail": "uv 0.7.17 (41c218a89 2025-06-29)"
+  },
+  "python": {
+    "ok": true,
+    "detail": "3.12.8"
+  },
+  "pdfplumber": {
+    "ok": true,
+    "detail": "available"
+  },
+  "python-docx": {
+    "ok": true,
+    "detail": "available"
+  },
+  "docxtpl": {
+    "ok": true,
+    "detail": "available"
+  },
+  "python-pptx": {
+    "ok": true,
+    "detail": "available"
+  }
+}

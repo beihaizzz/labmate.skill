@@ -59,7 +59,7 @@ def create_sample_guide():
     # Diagram placeholder shape
     shape = slide3.shapes.add_shape(1, Inches(3), Inches(4), Inches(4), Inches(2))  # rectangle
     shape.fill.solid()
-    shape.fill.fore_color.rgb = RgbColor(200, 200, 200)
+    shape.fill.fore_color.rgb = RGBColor(200, 200, 200)
     tf_shape = shape.text_frame
     tf_shape.paragraphs[0].text = "[电路示意图]"
     tf_shape.paragraphs[0].font.size = Pt(16)

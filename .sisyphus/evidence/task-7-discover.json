@@ -1,0 +1,18 @@
+{
+  "test": "student info discovery - JSON output with existing file",
+  "working_dir": "E:/lab-report",
+  "command": "python scripts/student_info.py --json",
+  "exit_code": 0,
+  "output": {
+    "found": true,
+    "path": "E:\\lab-report\\学生信息.md",
+    "data": {
+      "姓名": "",
+      "学号": "",
+      "学院": "",
+      "专业": "",
+      "班级": ""
+    }
+  },
+  "passed": true
+}

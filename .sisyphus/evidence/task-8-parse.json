@@ -1,0 +1,11 @@
+{
+  "filename": "sample.pdf",
+  "page_count": 2,
+  "text_by_page": [
+    {"page": 1, "content": "This is page 1 text."},
+    {"page": 2, "content": "This is page 2 text."}
+  ],
+  "markdown": "# Sample\n\nThis is a sample markdown extraction.",
+  "is_scanned": false,
+  "warning": null
+}

@@ -1,0 +1,67 @@
+{
+  "task": "T11 - progress_manager.py",
+  "file": "scripts/progress_manager.py",
+  "status": "pass",
+  "tests": [
+    {
+      "command": "python scripts/progress_manager.py",
+      "description": "Default - creates progress.json with default state",
+      "output": {
+        "experiment_name": "",
+        "total_steps": 0,
+        "current_step": 0,
+        "completed_steps": [],
+        "screenshots_required": [],
+        "notes": {},
+        "last_updated": "2026-04-24T18:42:51.760599",
+        "status": "not_started"
+      },
+      "result": "pass"
+    },
+    {
+      "command": "python scripts/progress_manager.py --init --experiment 'Test Experiment' --total-steps 5",
+      "description": "--init creates progress.json with experiment config",
+      "output": {
+        "experiment_name": "Test Experiment",
+        "total_steps": 5,
+        "status": "not_started"
+      },
+      "result": "pass"
+    },
+    {
+      "command": "python scripts/progress_manager.py --step 1 --status completed",
+      "description": "--step N --status completed updates completed_steps and current_step",
+      "output": {
+        "completed_steps": [1],
+        "current_step": 1
+      },
+      "result": "pass"
+    },
+    {
+      "command": "python scripts/progress_manager.py --screenshot --step 1 --description 'Test screenshot'",
+      "description": "--screenshot records screenshot requirement",
+      "output": {
+        "screenshots_required": [{
+          "step": 1,
+          "description": "Test screenshot",
+          "captured": false,
+          "path": null
+        }]
+      },
+      "result": "pass"
+    },
+    {
+      "command": "python scripts/progress_manager.py --reset",
+      "description": "--reset clears completed_steps, screenshots, notes but preserves experiment_name and total_steps",
+      "output": {
+        "completed_steps": [],
+        "screenshots_required": [],
+        "notes": {},
+        "current_step": 0,
+        "status": "not_started"
+      },
+      "result": "pass"
+    }
+  ],
+  "all_tests_pass": true
+}
