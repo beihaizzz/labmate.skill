@@ -4,6 +4,7 @@
 import subprocess
 import sys
 import json
+import shutil
 import argparse
 
 def check_uv():
@@ -41,6 +42,10 @@ def main():
         'python-docx': check_package('docx', 'docx'),
         'docxtpl': check_package('docxtpl'),
         'python-pptx': check_package('pptx', 'pptx'),
+        'libreoffice': (shutil.which('soffice') is not None or
+                        shutil.which('libreoffice') is not None,
+                        'available' if (shutil.which('soffice') or shutil.which('libreoffice'))
+                        else 'not found (.doc conversion unavailable)'),
     }
 
     if args.json:
@@ -50,7 +55,7 @@ def main():
         print("Lab-Report Dependency Check")
         print("=" * 40)
         for name, (ok, detail) in checks.items():
-            status = "✅" if ok else "❌"
+            status = "✅" if ok else ("⚠️" if name == 'libreoffice' else "❌")
             print(f"{status} {name}: {detail or ('OK' if ok else 'MISSING')}")
 
     all_ok = all(ok for ok, _ in checks.values())

@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import json
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -18,6 +19,41 @@ except ImportError:
 
 # De-AI banned words
 BANNED_WORDS = ['首先', '其次', '最后', '总而言之', '值得注意的是', '综上所述', '不可否认']
+
+
+def _find_libreoffice() -> str | None:
+    """Find LibreOffice executable."""
+    for name in ['soffice', 'libreoffice', 'soffice.exe', 'libreoffice.exe']:
+        found = shutil.which(name)
+        if found:
+            return found
+    for base in [r'C:\Program Files\LibreOffice\program',
+                 r'C:\Program Files (x86)\LibreOffice\program']:
+        for exe in ['soffice.exe', 'swriter.exe']:
+            cand = Path(base) / exe
+            if cand.exists():
+                return str(cand)
+    return None
+
+
+def _convert_to_docx(filepath: Path) -> Path | None:
+    """Convert .doc to .docx via LibreOffice. Returns .docx path or None."""
+    lo = _find_libreoffice()
+    if not lo:
+        return None
+    try:
+        result = subprocess.run(
+            [lo, '--headless', '--convert-to', 'docx', '--outdir',
+             str(filepath.parent), str(filepath)],
+            capture_output=True, text=True, timeout=60
+        )
+        if result.returncode == 0:
+            docx = filepath.with_suffix('.docx')
+            if docx.exists():
+                return docx
+    except Exception:
+        pass
+    return None
 
 def set_cjk_font(run, font_name='宋体'):
     """Set CJK font for a run to prevent tofu."""
@@ -51,6 +87,20 @@ def fill_template(template_path: Path, data_path: Path, output_path: Path, style
         # Load data
         with open(data_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
+        
+        # Handle .doc files — convert to .docx first
+        suffix = template_path.suffix.lower()
+        if suffix == '.doc':
+            converted = _convert_to_docx(template_path)
+            if converted is None:
+                result["error"] = (
+                    "Cannot process .doc template. Please:\n"
+                    "1. Install LibreOffice (https://www.libreoffice.org/)\n"
+                    "2. Or manually save as .docx in Word / WPS"
+                )
+                result["needs_conversion"] = True
+                return result
+            template_path = converted
         
         # Copy template (never modify original)
         shutil.copy(template_path, output_path)

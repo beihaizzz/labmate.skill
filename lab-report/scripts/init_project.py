@@ -38,7 +38,7 @@ def discover_files(directory: Path) -> dict:
         
         if suffix == '.pdf':
             files["guides"].append(file.name)
-        elif suffix == '.docx':
+        elif suffix in ['.docx', '.doc']:
             files["templates"].append(file.name)
         elif suffix == '.pptx':
             files["guides"].append(file.name)
