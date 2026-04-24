@@ -1,0 +1,26 @@
+Task: T14 - git_manager.py - Git auto-commit manager
+Status: COMPLETED
+Date: 2026-04-24
+
+Created: lab-report/scripts/git_manager.py
+
+Features implemented:
+1. Check if .git/ exists (if not, silently exit 0)
+2. Detect untracked and modified files via git status --porcelain
+3. git add -A to stage all changes
+4. Auto-generate commit message based on changed files
+5. --message/-m for custom commit message
+6. --dry-run to preview without committing
+
+Acceptance Criteria:
+- In Git repo with changes -> stages and commits
+- In non-Git directory -> silently exits 0
+- --dry-run only previews, doesn't commit
+
+Verification:
+- File created with all specified functions
+- is_git_repo(): checks for .git directory
+- get_git_status(): returns (untracked, modified) tuple
+- generate_commit_message(): auto-generates or uses custom
+- git_commit(): handles dry_run and actual commit
+- main(): argparse with --dir, --message, --dry-run
