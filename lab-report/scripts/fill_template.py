@@ -229,6 +229,72 @@ def fill_with_inspect(template_path: Path, data_path: Path, output_path: Path,
     return result
 
 
+def fill_cells_direct(template_path: Path, cells_data: list, output_path: Path,
+                       inspect_data: dict = None):
+    """Direct table fill mode — for templates without {{placeholders}}.
+    
+    cells_data: [
+      {"table": 0, "row": 3, "col": 1, "text": "张啸瑞",
+       "font_name": "宋体", "font_size": 14, "bold": false, "align": "CENTER", "east_asia": null}, ...
+    ]
+    """
+    if not HAS_DOCX:
+        return {"error": "Missing dependencies: python-docx"}
+
+    result = {"success": False, "template": str(template_path), "output": str(output_path),
+              "cells_filled": 0, "warnings": []}
+
+    suffix = template_path.suffix.lower()
+    if suffix == '.doc':
+        conv = _convert_to_docx(template_path)
+        if not conv:
+            result["error"] = "Cannot process .doc. Install LibreOffice or save as .docx."
+            return result
+        template_path = conv
+
+    try:
+        shutil.copy(template_path, output_path)
+        doc = Document(output_path)
+
+        for entry in cells_data:
+            t = entry.get("table", 0)
+            r = entry.get("row", 0)
+            c = entry.get("col", 0)
+            if t >= len(doc.tables):
+                result["warnings"].append(f"Table {t} not found"); continue
+            table = doc.tables[t]
+            if r >= len(table.rows):
+                result["warnings"].append(f"Table {t} row {r} not found"); continue
+            if c >= len(table.rows[r].cells):
+                result["warnings"].append(f"Table {t} R{r}C{c} not found"); continue
+            cell = table.rows[r].cells[c]
+
+            # 跳过标签单元格
+            if inspect_data:
+                for ti in inspect_data.get("tables", []):
+                    for ci in ti.get("cells", []):
+                        if ci["row"] == r and ci["column"] == c and ci.get("is_label"):
+                            result["warnings"].append(
+                                f"跳过标签单元格 R{r}C{c}: \"{ci.get('text','')}\"")
+                            break
+
+            fill_utils.fill_cell_safe(
+                cell, entry["text"],
+                font_name=entry.get("font_name", fill_utils.FONT_BODY),
+                font_size_pt=entry.get("font_size", fill_utils.SIZE_BODY),
+                bold=entry.get("bold", False),
+                east_asia=entry.get("east_asia", entry.get("font_name")),
+                align=entry.get("align"),
+            )
+            result["cells_filled"] += 1
+
+        doc.save(output_path)
+        result["success"] = True
+    except Exception as e:
+        result["error"] = f"直接填充失败: {e}"
+    return result
+
+
 def verify_original_unchanged(template_path: Path, original_hash: str) -> bool:
     with open(template_path, 'rb') as f:
         return hashlib.sha256(f.read()).hexdigest() == original_hash
@@ -239,21 +305,20 @@ fill_template = fill_with_inspect
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Fill DOCX template (requires inspect data)')
-    parser.add_argument('--template', '-t', required=True)
-    parser.add_argument('--data', '-d', required=True)
-    parser.add_argument('--output', '-o', required=True)
-    parser.add_argument('--inspect', help='JSON from inspect_template.py (required for correct formatting)')
+    parser = argparse.ArgumentParser(description='Fill DOCX template')
+    parser.add_argument('--template', '-t', required=True, help='模板文件 (.docx/.doc)')
+    parser.add_argument('--output', '-o', required=True, help='输出文件路径')
+    parser.add_argument('--data', '-d', help='JSON 数据文件（placeholder 模式）')
+    parser.add_argument('--cells', help='JSON 单元格直填文件（无 placeholder 模式）')
+    parser.add_argument('--inspect', help='inspect_template.py 输出的 JSON')
     parser.add_argument('--style', choices=['perfect', 'normal'], default='normal')
     args = parser.parse_args()
 
     template_path = Path(args.template)
-    data_path = Path(args.data)
     output_path = Path(args.output)
 
-    for p, label in [(template_path, 'Template'), (data_path, 'Data')]:
-        if not p.exists():
-            print(f"Error: {label} not found: {p}", file=sys.stderr); sys.exit(1)
+    if not template_path.exists():
+        print(f"Error: Template not found: {template_path}", file=sys.stderr); sys.exit(1)
 
     with open(template_path, 'rb') as f:
         original_hash = hashlib.sha256(f.read()).hexdigest()
@@ -264,10 +329,23 @@ def main():
         if ip.exists():
             with open(ip, 'r', encoding='utf-8') as f:
                 inspect_data = json.load(f)
-            if inspect_data.get("summary", {}).get("label_cells", 0) > 0:
-                print(f"Preserving {inspect_data['summary']['label_cells']} label cells", file=sys.stderr)
 
-    result = fill_with_inspect(template_path, data_path, output_path, inspect_data)
+    # 判断模式：--cells 走直接填充，否则走 placeholder 填充
+    if args.cells:
+        cells_path = Path(args.cells)
+        if not cells_path.exists():
+            print(f"Error: Cells file not found: {cells_path}", file=sys.stderr); sys.exit(1)
+        with open(cells_path, 'r', encoding='utf-8') as f:
+            cells_data = json.load(f)
+        result = fill_cells_direct(template_path, cells_data, output_path, inspect_data)
+    else:
+        if not args.data:
+            print("Error: 需要 --data（placeholder 模式）或 --cells（直接填充模式）", file=sys.stderr)
+            sys.exit(1)
+        data_path = Path(args.data)
+        if not data_path.exists():
+            print(f"Error: Data file not found: {data_path}", file=sys.stderr); sys.exit(1)
+        result = fill_with_inspect(template_path, data_path, output_path, inspect_data)
 
     if not verify_original_unchanged(template_path, original_hash):
         print("Error: Original template was modified!", file=sys.stderr); sys.exit(1)

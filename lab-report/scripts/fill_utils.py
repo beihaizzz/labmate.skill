@@ -3,9 +3,11 @@
 Shared constants and helper functions so all scripts use consistent formatting.
 """
 
-from docx.shared import Pt
+from docx.shared import Pt, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
+from docx import Document
+from typing import Optional
 import re
 
 # ── 格式化常量 ────────────────────────────────────────────────────────────────────
@@ -13,24 +15,21 @@ FONT_TITLE = '黑体'
 FONT_BODY = '宋体'
 FONT_CODE = 'Courier New'
 
-# 字号（pt）
-SIZE_TABLE0_VALUE = 14      # 表0（学生信息）值单元格
-SIZE_H1 = 12                # 一级标题（实验目的、实验要求等）
-SIZE_H2 = 11                # 二级标题
-SIZE_BODY = 12              # 正文
-SIZE_CODE = 9               # 代码/图片提示
-SIZE_IMAGE_HINT = 10        # 图片占位标签
+SIZE_TABLE0_VALUE = 14
+SIZE_H1 = 12
+SIZE_H2 = 11
+SIZE_BODY = 12
+SIZE_CODE = 9
+SIZE_IMAGE_HINT = 10
 
-# 首行缩进（2 字符，12pt 字号下 = 24pt）
 INDENT_2CHAR = Pt(24)
 
-# ── 段落角色识别 ──────────────────────────────────────────────────────────────────
 _LIST_ITEM_PATTERNS = re.compile(
     r'^\s*('
-    r'\d+[．\.、]'            # 1.  1、  １．
-    r'|[a-zA-Z][\)\.]'       # a)  b.
-    r'|[（\(][一二三四五六七八九十\d]+[）\)]'  # （1） (一)
-    r'|[一二三四五六七八九十]+[、．\.]'         # 一、  二．
+    r'\d+[．\.、]'
+    r'|[a-zA-Z][\)\.]'
+    r'|[（\(][一二三四五六七八九十\d]+[）\)]'
+    r'|[一二三四五六七八九十]+[、．\.]'
     r')\s*'
 )
 
@@ -41,7 +40,7 @@ def is_list_item(text: str) -> bool:
 
 
 def is_body_paragraph(text: str, min_len: int = 20) -> bool:
-    """Check if text is a descriptive body paragraph (vs title/list/hint)."""
+    """Check if text is a descriptive body paragraph."""
     t = text.strip()
     if not t:
         return False
@@ -56,10 +55,8 @@ def is_body_paragraph(text: str, min_len: int = 20) -> bool:
     return True
 
 
-# ── Run 级格式设置 ────────────────────────────────────────────────────────────────
-
 def set_run_font(run, font_name=None, font_size_pt=None, bold=None, east_asia=None):
-    """Set font properties on a run. Only sets non-None values."""
+    """Set font properties on a run."""
     if font_name:
         run.font.name = font_name
     if font_size_pt:
@@ -100,15 +97,6 @@ def apply_first_line_indent(para, indent=INDENT_2CHAR):
         para.paragraph_format.first_line_indent = indent
 
 
-# ── Cell/Paragraph 组织 ──────────────────────────────────────────────────────────
-
-def clear_cell(cell):
-    """Clear a cell's content, keeping the cell structure."""
-    for p in cell.paragraphs:
-        for r in p.runs:
-            r.text = ''
-
-
 def add_run(para, text, font_name=FONT_BODY, font_size_pt=SIZE_BODY,
             bold=False, east_asia=None):
     """Add a formatted run to a paragraph."""
@@ -119,7 +107,7 @@ def add_run(para, text, font_name=FONT_BODY, font_size_pt=SIZE_BODY,
 
 
 def heading_run(para, text, font_name=FONT_TITLE, font_size_pt=SIZE_H1):
-    """Add a heading run (黑体, bold)."""
+    """Add a heading run."""
     return add_run(para, text, font_name=font_name, font_size_pt=font_size_pt,
                    bold=True, east_asia=font_name)
 
@@ -132,9 +120,113 @@ def body_run(para, text, font_name=FONT_BODY, font_size_pt=SIZE_BODY):
 
 def image_hint_run(para, label: str):
     """Add a styled image placeholder."""
-    from docx.shared import Pt as PtSize
     run = add_run(para, f"\n[{label}]\n", font_name=FONT_BODY,
                   font_size_pt=SIZE_IMAGE_HINT, bold=False, east_asia=FONT_BODY)
     run.italic = True
     para.alignment = WD_ALIGN_PARAGRAPH.CENTER
     return run
+
+
+# ── 中文正文段落快捷写入 ──────────────────────────────────────────────────────────
+
+def add_chinese_body_para(cell, text: str, font_name=FONT_BODY, font_size_pt=SIZE_BODY):
+    """Write a Chinese body paragraph with first-line indent.
+    
+    自动清除单元格内容后写入一段中文正文，含首行缩进两声符、宋体、常规。
+    """
+    p = cell.paragraphs[0]
+    p.clear()
+    run = p.add_run(text)
+    set_run_font(run, font_name=font_name, font_size_pt=font_size_pt,
+                 bold=False, east_asia=font_name)
+    p.paragraph_format.first_line_indent = INDENT_2CHAR
+    return p
+
+
+# ── 安全单元格查找与写入 ──────────────────────────────────────────────────────────
+
+def find_cell_by_content(table, row_index: int, text_contains: str) -> Optional[object]:
+    """Find a cell in a specific row by matching partial text content.
+    
+    比 table.cell(r, c) 安全，避免合并单元格导致的索引偏移。
+    
+    Example:
+        cell = find_cell_by_content(table, 0, "提交文档")
+        if cell:
+            fill_cell_safe(...)
+    """
+    if row_index >= len(table.rows):
+        return None
+    row = table.rows[row_index]
+    for cell in row.cells:
+        if text_contains in cell.text.strip():
+            return cell
+    return None
+
+
+def fill_cell_safe(cell, text: str, font_name=FONT_BODY, font_size_pt=SIZE_BODY,
+                   bold=False, east_asia=None, align=None):
+    """Safely write text into a cell.
+    
+    清除旧内容、写入新文本、设字体/对齐/eastAsia。支持:
+    - 普通填充: fill_cell_safe(cell, "张三")
+    - 表格值填充: fill_cell_safe(cell, "张三", font_name=FONT_BODY, align="CENTER")
+    """
+    for p in cell.paragraphs:
+        p.clear()
+    first_para = cell.paragraphs[0]
+    run = first_para.add_run(text)
+    set_run_font(run, font_name=font_name, font_size_pt=font_size_pt,
+                 bold=bold, east_asia=east_asia)
+    if align:
+        set_paragraph_alignment(first_para, align)
+    return first_para
+
+
+# ── 合并单元格检测 ─────────────────────────────────────────────────────────────────
+
+def get_cell_grid_range(table, row_idx: int, col_idx: int) -> dict:
+    """Detect if a cell is merged and return its grid span.
+    
+    Returns: {colspan, rowspan} or None if not merged.
+    """
+    row = table.rows[row_idx]
+    if col_idx >= len(row.cells):
+        return {"colspan": 1, "rowspan": 1}
+    tc = row.cells[col_idx]._tc
+    tc_pr = tc.find(qn('w:tcPr'))
+    if tc_pr is None:
+        return {"colspan": 1, "rowspan": 1}
+    grid_span = tc_pr.find(qn('w:gridSpan'))
+    v_merge = tc_pr.find(qn('w:vMerge'))
+    colspan = int(grid_span.get(qn('w:val'))) if grid_span is not None else 1
+    rowspan = 2 if v_merge is not None else 1
+    return {"colspan": colspan, "rowspan": rowspan}
+
+
+def iter_cells_merged_aware(table):
+    """Iterate cells with merged-cell handling.
+    
+    Yields (row_idx, col_idx, cell, grid_info) for each logical cell position.
+    Skips cells that are hidden by a vertical merge.
+    """
+    grid = get_table_grid(table)
+    for r in range(len(table.rows)):
+        for c in range(len(grid[r])):
+            if grid[r][c] is None:
+                continue  # hidden by merge
+            cell = grid[r][c]
+            info = get_cell_grid_range(table, r, c)
+            yield r, c, cell, info
+
+
+def get_table_grid(table):
+    """Build a (rows × max_cols) grid of cell references.
+    
+    Cells hidden by vertical merge are set to None.
+    """
+    rows = []
+    for row in table.rows:
+        row_cells = list(row.cells)
+        rows.append(row_cells)
+    return rows

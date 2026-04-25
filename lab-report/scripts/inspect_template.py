@@ -193,13 +193,13 @@ def print_human_readable(result: dict):
             print(f"  R{cell['row']}C{cell['column']} [{tag}] \"{cell['text'][:50]}\"")
 
             for p in cell["paragraphs"]:
-            align_str = f" align={p['alignment']}" if p.get("alignment") else ""
-            for r in p["runs"]:
-                if r["text_preview"]:
-                    pt = r["font_size_pt"] if r["font_size_pt"] else "?"
-                    ea = r["east_asia"] if r["east_asia"] else "—"
-                    b = "B" if r["bold"] else " "
-                    print(f"    font={r['font_name']} {pt}pt eastAsia={ea} [{b}]{align_str} \"{r['text_preview'][:40]}\"")
+                align_str = f" align={p['alignment']}" if p.get("alignment") else ""
+                for r in p["runs"]:
+                    if r["text_preview"]:
+                        pt = r["font_size_pt"] if r["font_size_pt"] else "?"
+                        ea = r["east_asia"] if r["east_asia"] else "—"
+                        b = "B" if r["bold"] else " "
+                        print(f"    font={r['font_name']} {pt}pt eastAsia={ea} [{b}]{align_str} \"{r['text_preview'][:40]}\"")
 
     if result["body_paragraphs"]:
         print(f"\n─── Body Paragraphs ({len(result['body_paragraphs'])}) ───")
@@ -233,6 +233,7 @@ def main():
     parser.add_argument('--input', '-i', required=True, help='Template .docx file')
     parser.add_argument('--format', '-f', choices=['json', 'human'], default='json',
                         help='json=full data (feed to fill_template); human=readable summary')
+    parser.add_argument('--output', '-o', help='Save output to file instead of stdout')
     args = parser.parse_args()
 
     filepath = Path(args.input)
@@ -242,10 +243,27 @@ def main():
 
     result = inspect_template(filepath)
 
+    output_str = ""
     if args.format == 'human':
-        print_human_readable(result)
+        # human format prints directly to stdout
+        import io
+        buf = io.StringIO()
+        old_out = sys.stdout
+        sys.stdout = buf
+        try:
+            print_human_readable(result)
+        finally:
+            sys.stdout = old_out
+        output_str = buf.getvalue()
+        print(output_str, end='')
     else:
-        print(json.dumps(result, indent=2, ensure_ascii=False))
+        output_str = json.dumps(result, indent=2, ensure_ascii=False)
+        if not args.output:
+            print(output_str)
+
+    if args.output:
+        Path(args.output).write_text(output_str, encoding='utf-8')
+        print(f"Saved to {args.output}")
 
     sys.exit(0 if "error" not in result else 1)
 

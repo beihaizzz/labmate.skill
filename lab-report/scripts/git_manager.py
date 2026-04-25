@@ -7,6 +7,25 @@ import sys
 from pathlib import Path
 
 
+GITIGNORE_CONTENT = """# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+uv.lock
+
+# 实验截图（属于实验数据，不忽略）
+# screenshots/
+# 实验照片/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+"""
+
+
 def is_git_repo(directory: Path) -> bool:
     git_dir = directory / ".git"
     return git_dir.exists()
@@ -39,6 +58,33 @@ def get_git_status(directory: Path) -> tuple:
         return untracked, modified
     except subprocess.CalledProcessError:
         return [], []
+
+
+def git_init(directory: Path) -> bool:
+    """Initialize git repo and create .gitignore."""
+    try:
+        if (directory / ".git").exists():
+            print("Git 仓库已存在")
+            return True
+
+        subprocess.run(["git", "init"], cwd=directory, capture_output=True, check=True)
+
+        gitignore = directory / ".gitignore"
+        if not gitignore.exists():
+            gitignore.write_text(GITIGNORE_CONTENT.strip(), encoding='utf-8')
+            print("已创建 .gitignore")
+            subprocess.run(["git", "add", ".gitignore"], cwd=directory, capture_output=True)
+            subprocess.run(["git", "commit", "-m", "初始配置：添加 .gitignore"],
+                           cwd=directory, capture_output=True)
+
+        subprocess.run(["git", "add", "-A"], cwd=directory, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "初始提交"],
+                       cwd=directory, capture_output=True)
+        print(f"Git 仓库初始化完成: {directory}")
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"Git 初始化失败: {e}", file=sys.stderr)
+        return False
 
 
 def generate_commit_message(untracked: list, modified: list, custom_msg: str = None) -> str:
@@ -137,7 +183,13 @@ def main():
     parser.add_argument('--commit', action='store_true',
                         help='Stage AND commit (bypasses review sidebar). '
                              'Omit this flag to only stage (visible in review sidebar).')
+    parser.add_argument('--init', action='store_true',
+                        help='初始化 Git 仓库并创建 .gitignore')
     args = parser.parse_args()
+
+    if args.init:
+        success = git_init(args.dir)
+        sys.exit(0 if success else 1)
 
     if not is_git_repo(args.dir):
         sys.exit(0)

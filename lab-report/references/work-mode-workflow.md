@@ -205,10 +205,10 @@ python scripts/inspect_template.py --input path/to/template.docx --format json >
 3. **eastAsia is template-dictated.** Only set `w:eastAsia` on runs where the template already has it. If the template uses eastAsia=NULL on body text, do NOT add it there.
 4. **Row 3 may be a merged header row.** Some templates have a large title cell spanning columns — preserve it.
 5. **Alignment matters.** Table 0 (student info) value cells are typically `CENTER` aligned — match this. Check the `align=` field in inspect output.
-6. **First-line indent for body paragraphs.** Chinese academic reports indent the first line of each body paragraph by 2 characters (~24pt at 12pt font). Use `fill_utils.is_body_paragraph()` to auto-detect which paragraphs need indent:
-   - Starts with digit+period (1.) / Chinese bracket (（一）) → list item → no indent
-   - Long descriptive text (≥20 chars) → body paragraph → apply `first_line_indent = Pt(24)`
-   - Short labels / image hints / titles → no indent
+6. **First-line indent for body paragraphs.** Chinese academic reports indent the first line of each body paragraph by 2 characters (~24pt at 12pt font). Use `fill_utils.is_body_paragraph()` to auto-detect which paragraphs need indent.
+7. **Merged cell access.** When writing to cells in merged tables, **always use `table.rows[r].cells[c]`** (visual index) rather than `table.cell(r, c)` (grid index). The grid index can be offset by 1+ cells in merged tables. If you hit an IndexError, dump the table layout first to understand the merge structure.
+
+---
 
 ### Example: building the data JSON after inspect
 
@@ -316,6 +316,20 @@ After analysis, create an image placeholder instruction file (`.lab-report/image
 ```
 
 In the report content, add these markers at appropriate locations. The `fill_template.py --image-placeholders` flag will replace them with styled placeholders.
+
+### Image Insertion into the Report (Step 4.5b)
+
+After analyzing photos, insert key ones into the report:
+
+1. **Select** 1-2 representative photos per experiment stage（接线图、现象图、结果图）
+2. **Insert** after the corresponding text paragraph using python-docx:
+   ```python
+   from docx.shared import Inches
+   run = paragraph.add_run()
+   run.add_picture("screenshots/wiring.jpg", width=Inches(5.2))
+   ```
+3. **Add caption** below each image: 宋体 10.5pt, centered, "图1 硬件接线图"
+4. **Standard image width**: `Inches(5.2)` for A4 portrait page
 
 ---
 
@@ -557,4 +571,12 @@ python scripts/git_manager.py --commit --message "生成实验报告"
 
 # Preview
 python scripts/git_manager.py --dry-run
+
+# Init git repo
+python scripts/git_manager.py --init
 ```
+
+
+---
+
+## 附录：常见高校实验报告模板类型

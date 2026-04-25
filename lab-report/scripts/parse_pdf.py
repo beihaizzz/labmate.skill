@@ -50,7 +50,12 @@ def parse_pdf(filepath: Path, output_format: str = "json"):
         try:
             result["markdown"] = pymupdf4llm.to_markdown(str(filepath))
         except Exception as e:
-            result["markdown"] = f"# Error converting to markdown: {e}"
+            # 降级：用普通文本拼接作为 markdown
+            fallback_lines = []
+            for page in result.get("text_by_page", []):
+                fallback_lines.append(f"## 第 {page['page']} 页\n\n{page['content']}")
+            result["markdown"] = "\n\n".join(fallback_lines) if fallback_lines else ""
+            result["warning"] = (result.get("warning") or "") + f" Markdown转换失败({type(e).__name__})，已降级为纯文本"
         
     except Exception as e:
         result["error"] = str(e)
