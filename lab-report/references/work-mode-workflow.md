@@ -65,6 +65,26 @@ Required metadata to confirm:
 
 **If `学生信息.md` already exists**, auto-fill 姓名/学号/学院/专业/班级, but still confirm the per-experiment fields (日期、地点、学时、教师).
 
+### ⚠️ Critical: confirm student info before generating (fix 3 — no guessing grade/class)
+
+When loading student info, ALWAYS show the user a confirmation prompt:
+
+```
+检测到学生信息：
+  姓名：张啸瑞
+  学号：3120230901104
+  班级：计科1班
+  ⚠️ 年级：未明确（从"计科1班"推测为2023级，请确认）
+
+以上信息是否正确？
+```
+
+Rules:
+- **Never infer** grade/class/year without user confirmation
+- Show the raw data from `学生信息.md` exactly as-is
+- If any field seems ambiguous (e.g., "计科1班" — which year?), flag it as `⚠️ 待确认`
+- After user confirms, save to `.lab-report/config.json` so subsequent runs skip re-asking
+
 ### Example prompt:
 
 ```
@@ -181,9 +201,14 @@ python scripts/inspect_template.py --input path/to/template.docx --format json >
 ### ⚠️ Critical rules derived from inspect data
 
 1. **LABEL CELLS are sacred.** The inspect output marks them with `is_label: true`. Never overwrite them. If a template has "提交文档" in R2C3, keep it there.
-2. **Font sizes are template-dictated.** If the template says 宋体 12pt, use 宋体 12pt — not 宋体 10pt.
+2. **Font sizes and alignment are template-dictated.** Match font name, size, bold, AND alignment exactly.
 3. **eastAsia is template-dictated.** Only set `w:eastAsia` on runs where the template already has it. If the template uses eastAsia=NULL on body text, do NOT add it there.
 4. **Row 3 may be a merged header row.** Some templates have a large title cell spanning columns — preserve it.
+5. **Alignment matters.** Table 0 (student info) value cells are typically `CENTER` aligned — match this. Check the `align=` field in inspect output.
+6. **First-line indent for body paragraphs.** Chinese academic reports indent the first line of each body paragraph by 2 characters (~24pt at 12pt font). Use `fill_utils.is_body_paragraph()` to auto-detect which paragraphs need indent:
+   - Starts with digit+period (1.) / Chinese bracket (（一）) → list item → no indent
+   - Long descriptive text (≥20 chars) → body paragraph → apply `first_line_indent = Pt(24)`
+   - Short labels / image hints / titles → no indent
 
 ### Example: building the data JSON after inspect
 
@@ -357,11 +382,13 @@ Both styles apply CJK font fixes (宋体 for body text, 黑体 for headings) via
 2. Loads the **inspect data** — knows exactly which cells are labels (preserved), which are placeholders
 3. Renders all `{{placeholder}}` fields via docxtpl
 4. **Restores any accidentally overwritten label cells** (safety net — fix 2)
-5. **Applies formatting from inspect data only** — no guessing, no blanket eastAsia (fix 1, 5)
-6. Verifies CJK fonts only where template had eastAsia
-7. **Post-fill diff check** — detects any label cells that got overwritten and warns
-8. Checks for unreplaced placeholders
-9. Returns JSON with `success`, `warnings`, `placeholders_missing`
+5. **Applies formatting from inspect data** — font/size/bold/eastAsia/alignment all matched exactly (fix 1, 5)
+6. **Applies paragraph alignment** from template (CENTER for table 0 value cells — fix 2.1)
+7. **Applies first-line indent** for body paragraphs (list items auto-detected and skipped — fix 2.2)
+8. Sets CJK font (`eastAsia`) **only** where template explicitly had it (fix 5)
+9. **Post-fill diff check** — detects any label cells that got overwritten and warns
+10. Checks for unreplaced placeholders
+11. Returns JSON with `success`, `warnings`, `placeholders_missing`
 
 ---
 

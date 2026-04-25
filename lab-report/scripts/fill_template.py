@@ -12,12 +12,15 @@ from pathlib import Path
 
 try:
     from docx import Document
-    from docx.shared import Pt
     from docx.oxml.ns import qn
     from docxtpl import DocxTemplate
     HAS_DOCX = True
 except ImportError:
     HAS_DOCX = False
+
+# Import formatting utilities (outside try — fill_utils has its own import guards)
+sys.path.insert(0, str(Path(__file__).parent))
+import fill_utils
 
 BANNED_WORDS = ['首先', '其次', '最后', '总而言之', '值得注意的是', '综上所述', '不可否认']
 
@@ -52,26 +55,6 @@ def _convert_to_docx(filepath: Path) -> Path | None:
     except Exception:
         pass
     return None
-
-
-def _set_run_font(run, font_name=None, font_size_pt=None, bold=None, east_asia=None):
-    """Set font properties. ONLY sets eastAsia when template explicitly had it."""
-    if font_name:
-        run.font.name = font_name
-    if font_size_pt:
-        run.font.size = Pt(font_size_pt)
-    if bold is not None:
-        run.font.bold = bold
-    if east_asia:
-        rPr = run._element.find(qn('w:rPr'))
-        if rPr is None:
-            rPr = run._element.makeelement(qn('w:rPr'), {})
-            run._element.insert(0, rPr)
-        rFonts = rPr.find(qn('w:rFonts'))
-        if rFonts is None:
-            rFonts = rPr.makeelement(qn('w:rFonts'), {})
-            rPr.append(rFonts)
-        rFonts.set(qn('w:eastAsia'), east_asia)
 
 
 def _verify_no_missing_placeholders(doc: Document) -> list:
@@ -126,7 +109,7 @@ def _build_cell_index(inspect_data: dict):
 
 
 def _get_fmt_from_ref(cell_ref_key, row, col, inspect_data):
-    """Extract font_name, size_pt, bold, east_asia from the first non-empty run in cell_ref."""
+    """Extract font_name, size_pt, bold, east_asia, alignment from the first non-empty run."""
     ci = None
     for table in inspect_data.get("tables", []):
         for c in table.get("cells", []):
@@ -136,15 +119,26 @@ def _get_fmt_from_ref(cell_ref_key, row, col, inspect_data):
         if ci:
             break
     if not ci:
-        return None, None, None, None
+        return None, None, None, None, None
+
+    # Get alignment from first paragraph
+    alignment = None
+    for p in ci.get("paragraphs", []):
+        if p.get("alignment"):
+            alignment = p["alignment"]
+            break
+
+    # Get font info from first non-empty run
     for p in ci.get("paragraphs", []):
         for rn in p.get("runs", []):
             if rn.get("text_preview", "").strip():
                 return (rn.get("font_name"),
                         rn.get("font_size_pt"),
                         rn.get("bold"),
-                        rn.get("east_asia"))
-    return None, None, None, None
+                        rn.get("east_asia"),
+                        alignment)
+
+    return None, None, None, None, None
 
 
 def fill_with_inspect(template_path: Path, data_path: Path, output_path: Path,
@@ -206,11 +200,17 @@ def fill_with_inspect(template_path: Path, data_path: Path, output_path: Path,
                     # Apply template-correct formatting from inspect data (fix 1, 5)
                     ref = cell_ref.get(key)
                     if ref and inspect_data:
-                        fname, fsize, fbold, fea = _get_fmt_from_ref(ref, r_idx, c_idx, inspect_data)
+                        fname, fsize, fbold, fea, falign = _get_fmt_from_ref(
+                            ref, r_idx, c_idx, inspect_data)
                         for para in cell.paragraphs:
+                            # Apply paragraph alignment (fix 2.1)
+                            fill_utils.set_paragraph_alignment(para, falign)
+                            # Apply first-line indent for body paragraphs (fix 2.2)
+                            fill_utils.apply_first_line_indent(para)
                             for run in para.runs:
-                                _set_run_font(run, font_name=fname, font_size_pt=fsize,
-                                              bold=fbold, east_asia=fea)
+                                fill_utils.set_run_font(
+                                    run, font_name=fname, font_size_pt=fsize,
+                                    bold=fbold, east_asia=fea)
 
         final_doc.save(output_path)
 

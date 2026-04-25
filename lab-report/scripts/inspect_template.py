@@ -193,12 +193,13 @@ def print_human_readable(result: dict):
             print(f"  R{cell['row']}C{cell['column']} [{tag}] \"{cell['text'][:50]}\"")
 
             for p in cell["paragraphs"]:
-                for r in p["runs"]:
-                    if r["text_preview"]:
-                        pt = r["font_size_pt"] if r["font_size_pt"] else "?"
-                        ea = r["east_asia"] if r["east_asia"] else "—"
-                        b = "B" if r["bold"] else " "
-                        print(f"    font={r['font_name']} {pt}pt eastAsia={ea} [{b}] \"{r['text_preview'][:40]}\"")
+            align_str = f" align={p['alignment']}" if p.get("alignment") else ""
+            for r in p["runs"]:
+                if r["text_preview"]:
+                    pt = r["font_size_pt"] if r["font_size_pt"] else "?"
+                    ea = r["east_asia"] if r["east_asia"] else "—"
+                    b = "B" if r["bold"] else " "
+                    print(f"    font={r['font_name']} {pt}pt eastAsia={ea} [{b}]{align_str} \"{r['text_preview'][:40]}\"")
 
     if result["body_paragraphs"]:
         print(f"\n─── Body Paragraphs ({len(result['body_paragraphs'])}) ───")
@@ -209,16 +210,20 @@ def print_human_readable(result: dict):
                 pt = r["font_size_pt"] if r["font_size_pt"] else "?"
                 ea = r["east_asia"] if r["east_asia"] else "—"
                 b = "B" if r["bold"] else " "
-                print(f"    font={r['font_name']} {pt}pt eastAsia={ea} [{b}] \"{r['text_preview'][:40]}\"")
+                al = f" align={p['alignment']}" if p.get("alignment") else ""
+                print(f"    font={r['font_name']} {pt}pt eastAsia={ea} [{b}]{al} \"{r['text_preview'][:40]}\"")
 
     print("\n" + "=" * 60)
     print("HOW TO USE THIS DATA")
     print("=" * 60)
     print("1. Each [LABEL] cell must be PRESERVED as-is — do NOT overwrite.")
-    print("2. Each [PLACEHOLDER] cell can be replaced — use the SAME font/size/eastAsia as shown.")
-    print("3. eastAsia column: if '—' (none), do NOT add eastAsia. Only set eastAsia where template has it.")
-    print("4. Font sizes in pt — use exactly these values in fill_template.py.")
-    print("5. Build data JSON with keys matching each {{placeholder}}.")
+    print("2. Each [PLACEHOLDER] cell can be replaced — use the SAME font/size/eastAsia/align as shown.")
+    print("3. eastAsia column: if '—' (none), do NOT add eastAsia to that cell.")
+    print("4. ALIGN column: match this exactly (CENTER/LEFT/RIGHT). Table 0 value cells should be CENTER.")
+    print("5. Font sizes in pt — use exactly these values.")
+    print("6. Build data JSON with keys matching each {{placeholder}}.")
+    print("7. Body paragraphs (成段叙述) should have first-line indent of 24pt (2 chars).")
+    print("8. List items (1., 2., (1)) should NOT have indent.")
 
 
 def main():
