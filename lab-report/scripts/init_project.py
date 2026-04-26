@@ -58,6 +58,80 @@ def discover_files(directory: Path) -> dict:
     
     return files
 
+
+TEMPLATE_FINGERPRINTS = [
+    "课程名称", "学生姓名", "学号", "专业年级", "任课教师",
+    "实验名称", "实验类型", "实验学时", "实验日期", "实验地点",
+    "实验目的", "实验原理", "实验内容", "实验要求",
+]
+
+
+def _extract_text_from_doc(filepath: Path) -> str:
+    """从 .doc (OLE2) 提取纯文本。（无 LibreOffice 降级方案）"""
+    try:
+        import olefile
+        ole = olefile.OleFileIO(str(filepath))
+        # 尝试读取 WordDocument 流
+        if ole.exists('WordDocument'):
+            stream = ole.openstream('WordDocument')
+            raw = stream.read()
+            # 过滤可读字符
+            text = ''.join(chr(b) for b in raw if 0x20 <= b < 0x7f or 0x80 <= b <= 0xff)
+            # 清理乱码序列
+            text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', text)
+            return text
+        ole.close()
+    except ImportError:
+        pass
+    except Exception:
+        pass
+    return ""
+
+
+def _detect_embedded_template(filepath: Path) -> dict | None:
+    """检测 .doc 文件中是否嵌有报告模板。"""
+    suffix = filepath.suffix.lower()
+    
+    if suffix == '.docx':
+        try:
+            from docx import Document
+            doc = Document(filepath)
+            text = " ".join([p.text for p in doc.paragraphs])
+            for table in doc.tables:
+                for row in table.rows:
+                    for cell in row.cells:
+                        text += " " + cell.text
+        except Exception:
+            return None
+    elif suffix == '.doc':
+        text = _extract_text_from_doc(filepath)
+    else:
+        return None
+    
+    if not text:
+        return None
+    
+    found = [fp for fp in TEMPLATE_FINGERPRINTS if fp in text]
+    if len(found) >= 4:
+        return {"source": filepath.name, "cells_detected": found,
+                "type": "embedded_in_guide", "status": "detected"}
+    return None
+
+
+def _save_config(directory: Path, data: dict):
+    """保存配置到 .lab-report/config.json"""
+    config_dir = directory / ".lab-report"
+    config_dir.mkdir(exist_ok=True)
+    config_file = config_dir / "config.json"
+    existing = {}
+    if config_file.exists():
+        try:
+            existing = json.loads(config_file.read_text(encoding='utf-8'))
+        except (json.JSONDecodeError, IOError):
+            pass
+    existing.update(data)
+    config_file.write_text(json.dumps(existing, indent=2, ensure_ascii=False), encoding='utf-8')
+
 def init_project(directory: Path, use_git: bool = False, experiment_name: str = None):
     """Initialize project."""
     result = {
@@ -79,6 +153,20 @@ def init_project(directory: Path, use_git: bool = False, experiment_name: str = 
     
     # 2. Discover files
     result["discovered_files"] = discover_files(directory)
+    
+    # 2.5 检测 .doc 嵌入模板
+    result["embedded_templates"] = []
+    for file in directory.iterdir():
+        if not file.is_file():
+            continue
+        detected = _detect_embedded_template(file)
+        if detected:
+            result["embedded_templates"].append(detected)
+            result["discovered_files"].setdefault("templates_embedded", [])
+            result["discovered_files"]["templates_embedded"].append(file.name)
+    
+    if result["embedded_templates"]:
+        _save_config(directory, {"embedded_templates": result["embedded_templates"]})
     
     if not any(result["discovered_files"].values()):
         result["errors"].append("No course materials found in directory")

@@ -308,6 +308,70 @@ def _insert_image_at_match(doc: Document, match_text: str, image_path: str | Non
             break
 
 
+def fill_by_roles(template_source: Path, roles_data: dict, roles_map_path: Path,
+                   output_path: Path) -> dict:
+    """按角色名填充模板。
+
+    1. 从 roles_map (extract_template 输出) 获取每个角色的 cell 坐标
+    2. 复制 template_source 为 output
+    3. 用 roles_data 中对应 key 的值替换 fillable cell
+    4. 标签 cell 保持不变
+    """
+    if not HAS_DOCX:
+        return {"error": "Missing dependencies: python-docx, docxtpl"}
+
+    result = {"success": False, "output": str(output_path), "roles_filled": [], "warnings": []}
+
+    try:
+        with open(roles_map_path, 'r', encoding='utf-8') as f:
+            roles_map = json.load(f)
+    except Exception as e:
+        result["error"] = f"无法读取角色映射: {e}"
+        return result
+
+    try:
+        shutil.copy(template_source, output_path)
+        doc = Document(output_path)
+
+        filled = 0
+        for role_name, targets in roles_map.get("roles", {}).items():
+            if role_name not in roles_data:
+                continue
+            value = roles_data[role_name]
+            for target in targets:
+                t_idx = target["table"]
+                r_idx = target["row"]
+                c_idx = target["col"]
+                fmt = target.get("format", {})
+
+                if t_idx >= len(doc.tables):
+                    continue
+                table = doc.tables[t_idx]
+                if r_idx >= len(table.rows):
+                    continue
+                if c_idx >= len(table.rows[r_idx].cells):
+                    continue
+                cell = table.rows[r_idx].cells[c_idx]
+
+                fill_utils.fill_cell_safe(
+                    cell, str(value),
+                    font_name=fmt.get("font_name", fill_utils.FONT_BODY),
+                    font_size_pt=fmt.get("font_size", fill_utils.SIZE_BODY),
+                    bold=fmt.get("bold", False),
+                    east_asia=fmt.get("east_asia"),
+                    align=fmt.get("alignment"),
+                )
+                result["roles_filled"].append(role_name)
+                filled += 1
+
+        doc.save(output_path)
+        result["success"] = True
+    except Exception as e:
+        result["error"] = f"角色填充失败: {e}"
+
+    return result
+
+
 # Backward-compatible alias for tests
 fill_template = fill_with_inspect
 
@@ -318,6 +382,8 @@ def main():
     parser.add_argument('--output', '-o', required=True, help='输出文件路径')
     parser.add_argument('--data', '-d', help='JSON 数据文件（placeholder 模式）')
     parser.add_argument('--cells', help='JSON 单元格直填文件（无 placeholder 模式）')
+    parser.add_argument('--roles', help='按角色名填充的 data JSON（配合 --template-source）')
+    parser.add_argument('--template-source', help='成品报告作为模板来源（配合 --roles）')
     parser.add_argument('--inspect', help='inspect_template.py 输出的 JSON')
     parser.add_argument('--images', help='JSON 图片插入配置（按段落文本匹配插入位置）')
     parser.add_argument('--style', choices=['perfect', 'normal'], default='normal')
@@ -339,8 +405,22 @@ def main():
             with open(ip, 'r', encoding='utf-8') as f:
                 inspect_data = json.load(f)
 
-    # 判断模式：--cells 走直接填充，否则走 placeholder 填充
-    if args.cells:
+    # 判断模式
+    if args.roles:
+        # 角色名填充模式（从成品报告提取模板结构）
+        roles_path = Path(args.roles)
+        if not roles_path.exists():
+            print(f"Error: Roles file not found: {roles_path}", file=sys.stderr); sys.exit(1)
+        if not args.template_source:
+            print("Error: --roles 需要 --template-source（成品报告路径）", file=sys.stderr); sys.exit(1)
+        template_source = Path(args.template_source)
+        if not template_source.exists():
+            print(f"Error 模板来源不存在: {template_source}", file=sys.stderr); sys.exit(1)
+        with open(roles_path, 'r', encoding='utf-8') as f:
+            roles_data = json.load(f)
+        result = fill_by_roles(template_source, roles_data, roles_path, output_path)
+
+    elif args.cells:
         cells_path = Path(args.cells)
         if not cells_path.exists():
             print(f"Error: Cells file not found: {cells_path}", file=sys.stderr); sys.exit(1)
