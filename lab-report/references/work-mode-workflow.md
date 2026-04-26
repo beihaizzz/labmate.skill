@@ -207,6 +207,11 @@ python scripts/inspect_template.py --input path/to/template.docx --format json >
 5. **Alignment matters.** Table 0 (student info) value cells are typically `CENTER` aligned — match this. Check the `align=` field in inspect output.
 6. **First-line indent for body paragraphs.** Chinese academic reports indent the first line of each body paragraph by 2 characters (~24pt at 12pt font). Use `fill_utils.is_body_paragraph()` to auto-detect which paragraphs need indent.
 7. **Merged cell access.** When writing to cells in merged tables, **always use `table.rows[r].cells[c]`** (visual index) rather than `table.cell(r, c)` (grid index). The grid index can be offset by 1+ cells in merged tables. If you hit an IndexError, dump the table layout first to understand the merge structure.
+8. **⭐ 章节顺序必须与模板完全一致。** 模板中「实验目的 → 实验要求 → 实验原理 → 实验内容」的顺序就是最终报告的顺序。不要自行调整、跳过、或插入额外章节。如果模板没有「实验器材」这一节，就不要加。
+9. **⭐ 实验指导书内容优先。** 如果实验指导书中已有「实验目的」「实验原理」等内容：
+   - **直接使用指导书的原文**，不要改写、扩写、或缩写
+   - 仅在指导书**没有覆盖**时才自行撰写
+   - 如果指导书内容与模板章节标题匹配，优先使用指导书内容
 
 ---
 
@@ -220,9 +225,10 @@ Each placeholder maps to one of three data sources:
 
 | Source | Fields | How to obtain |
 |--------|--------|---------------|
+| **实验指导书原文（优先）** | 实验目的, 实验原理, 实验器材, 实验要求 | `parse_pdf.py` / `.lab-report/guide-content.json` |
 | Student info | 姓名, 学号, 学院, 专业, 班级 | `scripts/student_info.py` |
 | Experiment progress | 实验名称, 实验步骤, 实验数据 | `.lab-report/progress.json` |
-| Student description | 实验目的, 实验原理, 实验器材, 实验结果, 实验结论 | Ask the student or infer from guide content |
+| Student description | 实验结果, 实验结论 (仅在以上来源无覆盖时) | Ask the student |
 
 ### Mapping Table
 
@@ -237,10 +243,11 @@ Each placeholder maps to one of three data sources:
 | `{{实验名称}}` | progress.experiment_name | Ask student |
 | `{{实验日期}}` | Ask student | Today's date |
 | `{{实验地点}}` | Ask student | From guide |
-| `{{实验目的}}` | Parsed guide content | Ask student |
-| `{{实验原理}}` | Parsed guide content | Ask student |
-| `{{实验器材}}` | Parsed guide content | Ask student |
-| `{{实验步骤}}` | progress.notes + completed steps | Ask student |
+| `{{实验目的}}` | **实验指导书原文** | Ask student |
+| `{{实验原理}}` | **实验指导书原文** | Ask student |
+| `{{实验器材}}` | **实验指导书原文** | Ask student |
+| `{{实验要求}}` | **实验指导书原文** | Ask student |
+| `{{实验步骤}}` | progress.notes + **指导书步骤** | Ask student |
 | `{{实验数据}}` | progress.notes + screenshots | Ask student |
 | `{{实验结果}}` | Ask student | Infer from data |
 | `{{实验结论}}` | Ask student | Infer from results |

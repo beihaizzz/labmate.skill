@@ -224,6 +224,8 @@ def print_human_readable(result: dict):
     print("6. Build data JSON with keys matching each {{placeholder}}.")
     print("7. Body paragraphs (成段叙述) should have first-line indent of 24pt (2 chars).")
     print("8. List items (1., 2., (1)) should NOT have indent.")
+    print("9. ⭐ SECTION ORDER: The order of sections in the template IS the order in the final report. Do NOT rearrange, skip, or add sections.")
+    print("10. ⭐ GUIDE CONTENT: If the experiment guide contains matching sections (实验目的, 实验原理, etc.), use the guide's text verbatim — do NOT paraphrase.")
 
 
 def main():

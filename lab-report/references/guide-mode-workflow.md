@@ -83,6 +83,24 @@ After parsing, extract steps from the raw text using these patterns:
 
 Group extracted steps into a numbered list. Each step should be a single actionable instruction, not a paragraph.
 
+### ⭐ Extracting Content for the Report
+
+When the experiment guide contains sections matching standard report sections, **extract and preserve the original text verbatim**:
+
+| If guide contains... | → Store for Work Mode as... |
+|---------------------|---------------------------|
+| 实验目的 section | Report 实验目的 content (use exactly) |
+| 实验原理 section | Report 实验原理 content (use exactly) |
+| 实验器材/设备 section | Report 实验器材 content (use exactly) |
+| 实验步骤 section | Report 实验步骤 content (use as base, add observations) |
+| 实验要求 section | Report 实验要求 content (use exactly) |
+
+**Rules**:
+- Do NOT paraphrase, summarize, or "improve" the guide's own text for these sections
+- Only add content for sections the guide does NOT cover
+- Record which sections came from the guide vs were AI-generated
+- Save extracted content to `.lab-report/guide-content.json` for Work Mode to pick up
+
 ---
 
 ## Step 2: Identify Screenshot-Worthy Steps
