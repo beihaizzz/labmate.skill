@@ -64,7 +64,7 @@ Summary:
    - Script applies formatting from inspect data only (no guessing font/size/eastAsia)
    - Post-fill diff check detects accidental overwrites
 10. Generate new Word file (original template untouched)
-11. **Stage changes** (default `git add` only — files appear in review sidebar)
+11. **Git 管理**：默认仅报告文件位置（留在 Changes 面板）。`--stage` 暂存、`--commit` 提交
 
 ## File Format Support
 | Format | Read | Script |
@@ -101,7 +101,7 @@ Run scripts via `uv run --with <pkgs> python scripts/<name>.py`:
 | `init_project.py` | Orchestrate initialization |
 | `fill_template.py` | Fill DOCX template |
 | `progress_manager.py` | Manage progress.json |
-| `git_manager.py` | Auto git commit |
+| `git_manager.py` | Git management (default: report status) |
 
 ## Troubleshooting
 - **Chinese text shows as boxes**: CJK font not set. Scripts auto-set `w:eastAsia` but verify with `python -c "from docx import Document; ..."`

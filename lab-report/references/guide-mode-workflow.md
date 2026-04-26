@@ -396,9 +396,12 @@ python scripts/progress_manager.py --debug --step N --error "error message" --at
 # Reset progress
 python scripts/progress_manager.py --reset --experiment "名称" --total-steps N
 
-# Git — stage (default, visible in review sidebar)
+# Git — 默认仅报告（文件保留在 Changes 面板）
 python scripts/git_manager.py
 
-# Git — stage + commit (bypasses review sidebar)
+# Git — 暂存（文件进入 Staged Changes）
+python scripts/git_manager.py --stage
+
+# Git — 直接提交
 python scripts/git_manager.py --commit --message "实验完成"
 ```

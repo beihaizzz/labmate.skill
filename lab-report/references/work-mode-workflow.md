@@ -444,30 +444,32 @@ The script automatically sets CJK fonts, but verify manually if the output looks
 
 ---
 
-## Step 8: Stage for Review (Optional)
+## Step 8: Git 文件管理
 
-Files are **staged** (not committed) by default so they appear in the review sidebar.
-
-### Stage for review (default — files visible in sidebar)
+### 默认：仅报告（文件保留在 Changes 面板）
 
 ```bash
 python scripts/git_manager.py
 ```
 
-After this, the generated report appears in OpenCode Desktop's **审查侧边栏** for the user to inspect.
+输出示例：
+```
+📂 以下文件已生成/修改（可在 Changes 面板查看）：
+  [新文件] 实验一 - 陈虹宇.docx
+💡 确认无误后运行: python scripts/git_manager.py --stage
+```
 
-### Stage + commit (bypasses sidebar)
+### 暂存（git add）
 
-Use `--commit` when the user explicitly asks to skip the review step:
+```bash
+python scripts/git_manager.py --stage
+```
+⚠️ 暂存后文件从 Changes 移到 Staged Changes（VSCode 默认折叠）
+
+### 直接提交（跳过审查）
 
 ```bash
 python scripts/git_manager.py --commit --message "生成实验报告"
-```
-
-### Preview without making changes
-
-```bash
-python scripts/git_manager.py --dry-run
 ```
 
 ---
@@ -579,14 +581,17 @@ python scripts/fill_template.py \
   --inspect .lab-report/template-inspect.json \
   -o output.docx --style perfect
 
-# Stage (default — appears in review sidebar)
+# Git — 默认仅报告（文件保留在 Changes 面板）
 python scripts/git_manager.py
 
-# Stage + commit (skips review sidebar)
+# Git — 暂存（文件进入 Staged Changes）
+python scripts/git_manager.py --stage
+
+# Git — 直接提交
 python scripts/git_manager.py --commit --message "生成实验报告"
 
-# Preview
-python scripts/git_manager.py --dry-run
+# Git — 初始化仓库
+python scripts/git_manager.py --init
 
 # Init git repo
 python scripts/git_manager.py --init
