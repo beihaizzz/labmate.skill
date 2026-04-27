@@ -1,9 +1,9 @@
 ---
 name: lab-report
 description: |
-  Lab Report skill for university students. Helps complete lab experiments with two modes: 
-  Guide Mode (walk through experiment steps, remind screenshots) and Work Mode (fill templates, 
-  generate reports). Triggers on: lab report, 实验报告, experiment report, /lab-report,
+  Lab Report skill for university students. Helps complete lab experiments with two modes.
+  Trigger: `/lab` command. Subcommands: `-init`, `-work`, `-guide`, `-update`, `-help`.
+  Keywords: lab report, 实验报告, experiment report, /lab-report, /lab,
   实验指导, .docx template, .pdf guide, experiment writeup.
 metadata:
   openclaw:
@@ -30,8 +30,20 @@ Lab Report helps university students complete experiments and write reports. Two
 1. Create a folder for your course experiment
 2. Place all materials in it (experiment guide PDF/DOCX/PPTX, report template DOCX)
 3. Open OpenCode in that folder
-4. Run `/lab-report init` to initialize
+4. Run `/lab -init` to initialize
 5. Start Guide Mode or Work Mode
+
+## Commands
+
+所有命令以 `/lab` 触发：
+
+| 命令 | 作用 |
+|------|------|
+| `/lab -init` | 初始化项目。自动发现资料、创建 project.md、配置环境。`/lab -init --git` 启用版本管理 |
+| `/lab -work` | 强制进入 Work Mode。直接生成实验报告 |
+| `/lab -guide` | 强制进入 Guide Mode。开始指导实验 |
+| `/lab -update` | 重新扫描项目目录。用于新增实验或大量文件变更后，刷新 project.md 和 .lab-report/config.json |
+| `/lab -help` | 显示所有命令和简要说明 |
 
 ## Session Startup Protocol
 
@@ -44,7 +56,7 @@ Lab Report helps university students complete experiments and write reports. Two
 
 project.md 是 session 的"快速上下文"——读它即可了解整个项目状态，无需重新扫描整个目录。
 
-## /lab-report init
+## /lab -init
 Initializes the project. Auto-discovers course materials, finds/creates `学生信息.md`, creates `.lab-report/` directory. Supports `--git` for automatic version control.
 
 ## Guide Mode Workflow
