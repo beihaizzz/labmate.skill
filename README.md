@@ -47,11 +47,12 @@
 | 命令 | 作用 |
 |------|------|
 | `/lab -init` | 初始化项目 |
+| `/lab -init -git` | 初始化项目，将文件加入git管理 |
 | `/lab -work` | Work Mode — 生成实验报告 |
 | `/lab -guide` | Guide Mode — 指导完成实验 |
 | `/lab -update` | 重新扫描文件 |
-| `/lab -feedback` | 生成反馈报告 |
-| `/lab -help` | 帮助 |
+| `/lab -feedback` | 生成反馈报告，提交issue帮助我们优化 |
+| `/lab -help` | 帮助，快速查询labmate功能 |
 
 ### 🚀 扩展能力 — MCP
 
