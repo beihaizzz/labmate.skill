@@ -221,6 +221,32 @@ python scripts/inspect_template.py --input path/to/template.docx --format json >
 
 ---
 
+## Step 3.6: ⭐ Auto-Prepare Template (templates without placeholders)
+
+**Condition**: Trigger when `inspect_template` reports `has_placeholders: false`.
+
+If the template has NO `{{placeholder}}` syntax (most university templates use fixed tables like "姓名 | _____"), run:
+
+```bash
+uv run --with python-docx python scripts/auto_prepare_template.py \
+  --input template.docx \
+  --output .lab-report/prepared_template.docx
+```
+
+This script:
+- Detects label cells ("姓名", "学号", "课程名称") using enhanced heuristics
+- Finds adjacent fillable cells (empty or hint text like "_____", "（请填写）")
+- Injects `{{role}}` placeholders while preserving original formatting (font, size, alignment)
+- Supports both horizontal (same row) and vertical (row below) layouts
+- Is idempotent — safe to run multiple times
+
+After preparation:
+1. Re-run `inspect_template` on the prepared template to confirm `has_placeholders: true`
+2. Proceed with standard fill flow (Step 6) using the prepared template
+3. The original template is never modified
+
+---
+
 ### Example: building the data JSON after inspect
 
 After reading the inspect output, you know exactly what each cell expects. Build the data JSON accordingly, using the placeholder names found by the script.
@@ -329,6 +355,8 @@ After analysis, create an image placeholder instruction file (`.lab-report/image
 ```
 
 In the report content, add these markers at appropriate locations. The `fill_template.py --image-placeholders` flag will replace them with styled placeholders.
+
+⚠️ 图片内容无法由 AI 自动验证。fill_template.py 会生成 screenshot_manifest.json 列出所有插入图片及其位置。生成报告后请手动逐张确认截图内容正确。
 
 ### Image Insertion into the Report (Step 4.5b)
 
@@ -523,11 +551,25 @@ python scripts/git_manager.py --commit --message "生成实验报告"
          (student_info.py)
                   │
                   ▼
-         ⭐ Inspect template ← NEW: MANDATORY
-         (inspect_template.py --format json)
+⭐ Inspect template ← NEW: MANDATORY
+          (inspect_template.py --format json)
+                   │
+                   ▼
+          has_placeholders?
+             │         │
+            Yes        No
+             │         │
+             │         ▼
+             │   Auto-prepare template
+             │   (auto_prepare_template.py)
+             │         │
+             │         ▼
+             │   Re-inspect prepared
+             │         │
+             └────┬────┘
                   │
                   ▼
-         Map placeholders → data sources
+          Map placeholders → data sources
                   │
                   ▼
          Build template-data.json
@@ -559,7 +601,7 @@ python scripts/git_manager.py --commit --message "生成实验报告"
 | Situation | Response |
 |-----------|----------|
 | No template DOCX found | Ask student to provide one; list available `.docx` and `.doc` files in the directory |
-| Template has no placeholders | The template may use a different syntax; ask student to confirm |
+| Template has no placeholders | Run auto_prepare_template.py to auto-inject {{placeholder}} syntax |
 | Data JSON missing keys | Prompt student for missing values; use "暂无" as fallback |
 | `fill_template.py` fails | Check error message; common causes: missing dependency, corrupted template |
 | Unreplaced placeholders remain | Identify which ones, ask student for values, rebuild data JSON |
@@ -584,6 +626,14 @@ python scripts/student_info.py --json
 # ⭐ MANDATORY: Inspect template before fill
 python scripts/inspect_template.py --input template.docx --format human
 python scripts/inspect_template.py --input template.docx --format json > .lab-report/template-inspect.json
+
+# Auto-prepare template (inject placeholders)
+python scripts/auto_prepare_template.py \
+  --input template.docx --output prepared.docx
+
+# Auto-prepare (human-readable output)
+python scripts/auto_prepare_template.py \
+  --input template.docx --output prepared.docx --format human
 
 # Create student info template
 python scripts/student_info.py --create

@@ -307,6 +307,8 @@ This sets `captured: true` in the progress data.
 
 ## Step 7: Post-Experiment Photo Collection Review
 
+⚠️ AI 无法自动验证截图内容的正确性。以下分析仅作参考，请自行确认所有截图与实际实验内容一致。
+
 After all steps are completed but before transitioning to Work Mode, **actively review the captured screenshots/photos directory**.
 
 ### Discovery

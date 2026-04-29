@@ -454,6 +454,19 @@ def main():
                 _insert_image_at_match(out_doc, match_text, img_path, caption)
             out_doc.save(output_path)
 
+            # Output screenshot manifest for manual verification
+            manifest = []
+            for img_cfg in images_config:
+                manifest.append({
+                    "caption": img_cfg.get("caption", ""),
+                    "source_path": img_cfg.get("path", ""),
+                    "insert_location": img_cfg.get("match", ""),
+                    "需要人工验证": True
+                })
+            manifest_path = output_path.with_name(output_path.stem + '_manifest.json')
+            with open(str(manifest_path), 'w', encoding='utf-8') as f:
+                json.dump(manifest, f, indent=2, ensure_ascii=False)
+
     if result.get("warnings"):
         for w in result["warnings"]:
             print(f"WARNING: {w}", file=sys.stderr)

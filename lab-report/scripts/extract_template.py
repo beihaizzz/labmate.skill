@@ -15,59 +15,21 @@ import re
 import sys
 from pathlib import Path
 
+from role_aliases import ROLE_ALIASES, is_label_cell_v2, _normalize_role
+
 try:
     from docx import Document
     HAS_DOCX = True
 except ImportError:
     HAS_DOCX = False
 
-# 常见标签文本 → 标准化角色名
-ROLE_ALIASES = {
-    "课程名称": "课程名称",
-    "课程": "课程名称",
-    "课程代码": "课程代码",
-    "任课教师": "任课教师",
-    "教师": "任课教师",
-    "指导教师": "任课教师",
-    "学生姓名": "学生姓名",
-    "姓名": "学生姓名",
-    "年级": "专业年级",
-    "专业年级": "专业年级",
-    "专业": "专业年级",
-    "班级": "专业年级",
-    "学号": "学号",
-    "实验名称": "实验名称",
-    "实验项目": "实验名称",
-    "实验类型": "实验类型",
-    "实验学时": "实验学时",
-    "实验日期": "实验日期",
-    "实验地点": "实验地点",
-    "实验环境": "实验环境",
-    "实验设备": "实验设备",
-    "提交文档": "提交文档说明",
-}
-
-
-def _normalize_role(text: str) -> str:
-    """Standardize label text to a known role name."""
-    t = text.strip().replace("：", "").replace(":", "").replace(" ", "").replace("\n", "")
-    for key, value in ROLE_ALIASES.items():
-        if key in t:
-            return value
-    return t
+# Role aliases now imported from role_aliases module
+# _normalize_role uses ROLE_ALIASES directly
 
 
 def _is_label_cell(text: str) -> bool:
     """判断一个单元格是标签（如'课程名称'）还是内容（如'工程伦理'）"""
-    t = text.strip()
-    if not t:
-        return False
-    # 标签通常是短的、纯中文的，末尾不带标点（或只有冒号）
-    if len(t) > 20:
-        return False
-    if t.startswith(("{{", "（")):
-        return False
-    return True
+    return is_label_cell_v2(text)
 
 
 def extract(template_path: Path) -> dict:
