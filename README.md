@@ -1,11 +1,11 @@
 <table>
 <tr>
-<td><img src="logo.png" alt="LabMate" width="120"></td>
+<td><img src="logo.png" alt="LabMate.SKILL" width="120"></td>
 <td>
 
-# LabMate
+# LabMate.SKILL
 
-> **大学生时间拯救计划之LabMate** — 指导你完成实验，或帮你写实验报告。
+> **大学生时间拯救计划之LabMate.skill** — 指导你完成实验，或帮你写实验报告。
 
 </td>
 </tr>
