@@ -80,26 +80,6 @@ rm -rf ~/.claude/skills/lab/.venv ~/.claude/skills/lab/__pycache__ ~/.claude/ski
 | **去 AI 味** | 报告默认不分条目、无「首先其次最后」 |
 | **Git 版本管理** | 可选自动版本控制（`/lab -init -git`） |
 | **MCP 扩展** | Unity、STM32 等实验可直接操作实验环境 |
-请帮我安装 LabMate skill。这是一个帮助大学生完成实验报告的 OpenCode Skill。
-
-安装步骤：
-1. 克隆仓库：git clone https://github.com/beihaizzz/labmate.skill.git
-2. 将 labmate/ 目录复制到 OpenCode skill 目录：
-   - Windows: C:\Users\<用户名>\.claude\skills\labmate\
-   - macOS/Linux: ~/.claude/skills/labmate/
-3. 复制时排除 .venv、__pycache__、.pytest_cache、uv.lock、labmate.egg-info 目录
-
-这个 skill 的功能：
-- Guide Mode（指导模式）：读取实验指导书（PDF/Word/PPT/markitdown），展示实验步骤，同步进度，提醒截图
-- Work Mode（工作模式）：读取 Word 报告模板（用 {{字段名}} 标记占位符），根据实验过程填入内容，生成新 Word 文件
-- 自动发现课程资料、学生信息（学生信息.md）
-- 自动准备模板（auto_prepare_template.py）
-- 可选 Git 自动版本管理
-- 报告默认去 AI 味风格
-- DOCX 报告结构验证（validate_docx.py）
-
-安装完成后，帮我确认 skill 是否可以被发现。
-```
 
 ### 📖 命令速查
 
