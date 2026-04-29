@@ -2,7 +2,9 @@
 
 > **大学生时间拯救计划之LabMate** — 指导你完成实验，或帮你写实验报告。
 
-![logo](logo.png)
+<p align="center">
+  <img src="logo.png" alt="LabMate" width="160">
+</p>
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.9.0-blue)](https://github.com/beihaizzz/labmate.skill)
