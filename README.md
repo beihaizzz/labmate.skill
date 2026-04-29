@@ -16,11 +16,70 @@
 
 ## For Human 🧑‍🎓
 
-### 🤖 一键安装
+### ⚡ 一键安装（推荐）
 
-把这个发给你的 AI 编程助手（OpenCode / Cursor / Claude Code 等），它会帮你下载并安装：
+把这段话发给 Claude Code 或 OpenCode，AI 会自动完成安装：
 
 ```
+请帮我安装 LabMate skill（版本 v1.1.0），这是一个帮助大学生完成实验报告的工具。
+
+安装方法：
+1. `git clone https://github.com/beihaizzz/labmate.skill.git` 克隆仓库到任意位置
+2. 将仓库中的 `lab-report/` 目录（不是仓库根目录）复制为 skill 目录：
+   - Windows: C:\Users\<用户名>\.claude\skills\lab\
+   - macOS/Linux: ~/.claude/skills/lab/
+3. 复制时排除以下不需要的文件：.venv、__pycache__、.pytest_cache、uv.lock、*.egg-info
+
+完成后，在 Claude Code 中输入 `/lab -help` 确认安装成功。
+
+⚠️ 注意：skill 目录名必须是 `lab`（不是 labmate 或 lab-report），否则 `/lab` 命令无法触发。
+```
+
+### 🛠 手动安装
+
+#### Windows
+```powershell
+# 1. 克隆仓库
+git clone https://github.com/beihaizzz/labmate.skill.git
+
+# 2. 创建 skill 目录并复制内容（排除缓存/虚拟环境）
+New-Item -ItemType Directory -Path "$env:USERPROFILE\.claude\skills\lab" -Force
+Copy-Item "labmate.skill\lab-report\*" "$env:USERPROFILE\.claude\skills\lab\" -Recurse -Force
+Remove-Item "$env:USERPROFILE\.claude\skills\lab\.venv" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item "$env:USERPROFILE\.claude\skills\lab\__pycache__" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item "$env:USERPROFILE\.claude\skills\lab\.pytest_cache" -Recurse -Force -ErrorAction SilentlyContinue
+
+# 3. 验证
+# 重启 Claude Code，输入 /lab -help
+```
+
+#### macOS / Linux
+```bash
+# 1. 克隆仓库
+git clone https://github.com/beihaizzz/labmate.skill.git
+
+# 2. 创建 skill 目录并复制内容
+mkdir -p ~/.claude/skills/lab
+cp -r labmate.skill/lab-report/* ~/.claude/skills/lab/
+rm -rf ~/.claude/skills/lab/.venv ~/.claude/skills/lab/__pycache__ ~/.claude/skills/lab/.pytest_cache
+
+# 3. 验证
+# 重启 Claude Code，输入 /lab -help
+```
+
+### 🎯 核心能力
+
+| 功能 | 说明 |
+|------|------|
+| **Guide Mode** | 读取 PDF/Word/PPT 实验指导书，展示步骤、跟踪进度、提醒截图 |
+| **Work Mode** | 自动填入 Word 报告模板，支持 `{{占位符}}` 语法和无占位符模板 |
+| **模板自动准备** | 智能检测固定表格标签，自动注入 `{{placeholder}}` |
+| **OCR 扫描 PDF** | 实验指导书是扫描件也能自动提取文字（`/lab -guide --ocr`） |
+| **markitdown PPTX** | 比传统 python-pptx 提取更准确的 PPT 文字 |
+| **报告结构验证** | 一键检查生成报告的表格完整性、字体一致性 |
+| **去 AI 味** | 报告默认不分条目、无「首先其次最后」 |
+| **Git 版本管理** | 可选自动版本控制（`/lab -init -git`） |
+| **MCP 扩展** | Unity、STM32 等实验可直接操作实验环境 |
 请帮我安装 LabMate skill。这是一个帮助大学生完成实验报告的 OpenCode Skill。
 
 安装步骤：
@@ -255,7 +314,8 @@ uv run --with python-docx --with docxtpl python labmate/scripts/fill_template.py
 |------|------|
 | 永不修改原始文件 | `shutil.copy` 模板 → 操作副本 |
 | 中文不显示方框 | `run._element.rPr.rFonts.set(qn('w:eastAsia'), font_name)` |
-| 扫描 PDF 不崩溃 | pdfplumber 检测 text==None → `{is_scanned: true, warning: "SCANNED_PDF_DETECTED"}` |
+| 扫描 PDF 不崩溃 | pdfplumber 检测 text==None → `{is_scanned: true}`，支持 `--ocr` pytesseract 降级 |
+| 生成报告可验证 | `validate_docx.py` 自动检测表格完整性、字体一致性、残留占位符 |
 | SKILL.md < 5000 词 | 主文件 ~600 词，详细流程放 references/ |
 | 依赖声明式管理 | `uv run --with` 模式，pyproject.toml 只声明不安装 |
 | 脚本独立可运行 | 每个脚本有 `def main()` + `argparse.ArgumentParser` |
@@ -270,7 +330,7 @@ uv run --with python-docx --with docxtpl --with pdfplumber \
        pytest labmate/tests/ -v
 ```
 
-测试分为 8 个文件：`test_check_deps.py`、`test_fill_template.py`、`test_git_manager.py`、`test_init_project.py`、`test_parse_docx.py`、`test_parse_pdf.py`、`test_parse_pptx.py`、`test_progress_manager.py`、`test_student_info.py`
+测试分为 10 个文件：`test_auto_prepare_template.py`、`test_check_deps.py`、`test_fill_template.py`、`test_git_manager.py`、`test_init_project.py`、`test_integration.py`、`test_parse_docx.py`、`test_parse_pdf.py`、`test_parse_pptx.py`、`test_progress_manager.py`、`test_student_info.py`
 
 ### 学生信息发现机制
 
