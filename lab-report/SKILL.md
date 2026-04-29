@@ -1,5 +1,5 @@
 ---
-name: labmate
+name: lab
 description: |
   大学生时间拯救计划之LabMate：指导你完成实验或帮你写实验报告。
   Trigger: `/lab` command. Subcommands: `-init`, `-work`, `-guide`, `-update`, `-feedback`, `-help`.
