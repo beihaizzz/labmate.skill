@@ -12,7 +12,7 @@
 </table>
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.9.0-blue)](https://github.com/beihaizzz/labmate.skill)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue)](https://github.com/beihaizzz/labmate.skill)
 
 ## For Human 🧑‍🎓
 
@@ -31,11 +31,13 @@
 3. 复制时排除 .venv、__pycache__、.pytest_cache、uv.lock、labmate.egg-info 目录
 
 这个 skill 的功能：
-- Guide Mode（指导模式）：读取实验指导书（PDF/Word/PPT），展示实验步骤，同步进度，提醒截图
+- Guide Mode（指导模式）：读取实验指导书（PDF/Word/PPT/markitdown），展示实验步骤，同步进度，提醒截图
 - Work Mode（工作模式）：读取 Word 报告模板（用 {{字段名}} 标记占位符），根据实验过程填入内容，生成新 Word 文件
 - 自动发现课程资料、学生信息（学生信息.md）
+- 自动准备模板（auto_prepare_template.py）
 - 可选 Git 自动版本管理
 - 报告默认去 AI 味风格
+- DOCX 报告结构验证（validate_docx.py）
 
 安装完成后，帮我确认 skill 是否可以被发现。
 ```
@@ -48,7 +50,7 @@
 | `/lab -work` | Work Mode — 生成实验报告 |
 | `/lab -guide` | Guide Mode — 指导完成实验 |
 | `/lab -update` | 重新扫描文件 |
-| `/lab -review` | 生成反馈报告 |
+| `/lab -feedback` | 生成反馈报告 |
 | `/lab -help` | 帮助 |
 
 ### 🚀 扩展能力 — MCP
@@ -98,10 +100,10 @@
 /lab -init
 ```
 
-Skill 会自动发现文件夹中的所有资料，配置好环境。加上 `--git` 可以启用自动版本管理：
+Skill 会自动发现文件夹中的所有资料，配置好环境。加上 `-git` 可以启用自动版本管理：
 
 ```
-/lab -init --git
+/lab -init -git
 ```
 
 #### 第四步：选择模式
@@ -179,7 +181,7 @@ labmate/
 ├── assets/
 │   ├── report_template.docx     # 默认实验报告模板
 │   └── 学生信息模板.md           # 学生信息模板
-└── tests/                       # pytest 测试套件 (27 tests)
+└── tests/                       # pytest 测试套件 (39 tests)
 ```
 
 ### 架构设计
@@ -259,11 +261,11 @@ uv run --with python-docx --with docxtpl python labmate/scripts/fill_template.py
 
 ### 测试
 
-27 个 pytest 测试，覆盖所有脚本：
+39 个 pytest 测试，覆盖所有脚本：
 
 ```bash
 uv run --with python-docx --with docxtpl --with pdfplumber \
-       --with pymupdf4llm --with python-pptx \
+       --with pymupdf4llm --with markitdown \
        pytest labmate/tests/ -v
 ```
 
