@@ -4,7 +4,7 @@ Guide Mode walks a student through an experiment step by step, tracking progress
 
 ---
 
-## Step 0: Pre-Flight Checks (MANDATORY)
+## Step 0: Pre-Flight Checks (MANDATORY)（旧项目兼容 `.labmate/`）
 
 ### 0.0 Read project.md
 
@@ -103,7 +103,7 @@ When the experiment guide contains sections matching standard report sections, *
 - Do NOT paraphrase, summarize, or "improve" the guide's own text for these sections
 - Only add content for sections the guide does NOT cover
 - Record which sections came from the guide vs were AI-generated
-- Save extracted content to `.lab-report/guide-content.json` for Work Mode to pick up
+- Save extracted content to `.labmate/guide-content.json` for Work Mode to pick up
 
 ---
 
@@ -131,7 +131,7 @@ Use `scripts/progress_manager.py` to create the progress file:
 python scripts/progress_manager.py --init --experiment "实验名称" --total-steps N
 ```
 
-This creates `.lab-report/progress.json` with the structure defined in `schemas.md`.
+This creates `.labmate/progress.json` with the structure defined in `schemas.md`.
 
 For each screenshot-worthy step, register it:
 

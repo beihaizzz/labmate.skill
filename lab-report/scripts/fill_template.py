@@ -308,6 +308,34 @@ def _insert_image_at_match(doc: Document, match_text: str, image_path: str | Non
             break
 
 
+def _find_section_paragraph(doc, section_name: str) -> int:
+    """Find paragraph index containing a section heading like '实验步骤'."""
+    for i, p in enumerate(doc.paragraphs):
+        text = p.text.strip()
+        if section_name in text and len(text) < 50:
+            return i
+    return -1
+
+
+def _insert_images_by_section(doc: Document, image_configs: list):
+    """Insert images by section+offset matching (more precise than text-match)."""
+    for cfg in image_configs:
+        section = cfg.get("section", "")
+        offset = cfg.get("offset", 1)
+        image_path = cfg.get("path")
+        caption = cfg.get("caption", "此处插入照片")
+        
+        para_index = _find_section_paragraph(doc, section)
+        if para_index < 0:
+            continue
+        
+        insert_at = para_index + offset
+        if insert_at < len(doc.paragraphs):
+            fill_utils.insert_image_or_placeholder(
+                doc.paragraphs[insert_at], image_path, caption
+            )
+
+
 def fill_by_roles(template_source: Path, roles_data: dict, roles_map_path: Path,
                    output_path: Path) -> dict:
     """按角色名填充模板。
@@ -445,24 +473,34 @@ def main():
         if images_path.exists():
             with open(images_path, 'r', encoding='utf-8') as f:
                 images_config = json.load(f)
-            # images_config: [{"match": "文本片段", "path": "screenshots/x.jpg", "caption": "图注"}, ...]
             out_doc = Document(output_path)
-            for img_cfg in images_config:
-                match_text = img_cfg.get("match", "")
-                img_path = img_cfg.get("path")
-                caption = img_cfg.get("caption", "此处插入照片")
-                _insert_image_at_match(out_doc, match_text, img_path, caption)
+
+            # Detect image config format: new (section+offset) vs old (text-match)
+            if images_config and len(images_config) > 0 and isinstance(images_config[0], dict):
+                if "section" in images_config[0]:
+                    _insert_images_by_section(out_doc, images_config)
+                elif "match" in images_config[0]:
+                    for img_cfg in images_config:
+                        match_text = img_cfg.get("match", "")
+                        img_path = img_cfg.get("path")
+                        caption = img_cfg.get("caption", "此处插入照片")
+                        _insert_image_at_match(out_doc, match_text, img_path, caption)
             out_doc.save(output_path)
 
             # Output screenshot manifest for manual verification
             manifest = []
             for img_cfg in images_config:
-                manifest.append({
+                entry = {
                     "caption": img_cfg.get("caption", ""),
                     "source_path": img_cfg.get("path", ""),
-                    "insert_location": img_cfg.get("match", ""),
                     "需要人工验证": True
-                })
+                }
+                if "section" in img_cfg:
+                    entry["insert_section"] = img_cfg.get("section", "")
+                    entry["insert_offset"] = img_cfg.get("offset", 1)
+                else:
+                    entry["insert_location"] = img_cfg.get("match", "")
+                manifest.append(entry)
             manifest_path = output_path.with_name(output_path.stem + '_manifest.json')
             with open(str(manifest_path), 'w', encoding='utf-8') as f:
                 json.dump(manifest, f, indent=2, ensure_ascii=False)

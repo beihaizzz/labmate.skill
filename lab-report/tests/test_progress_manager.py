@@ -11,14 +11,9 @@ import progress_manager
 @pytest.fixture(autouse=True)
 def isolate_progress(tmp_path, monkeypatch):
     """Isolate progress.json to a temp directory."""
-    progress_file = tmp_path / ".lab-report" / "progress.json"
-    monkeypatch.setattr(progress_manager, "PROGRESS_FILE", str(progress_file))
-    # Also patch get_progress_path to return the isolated path
-    monkeypatch.setattr(
-        progress_manager,
-        "get_progress_path",
-        lambda: Path(progress_manager.PROGRESS_FILE)
-    )
+    working_dir = str(tmp_path / ".labmate")
+    monkeypatch.setattr(progress_manager, "_get_working_dir", lambda base_path=Path.cwd(): working_dir)
+    progress_file = Path(working_dir) / "progress.json"
     yield tmp_path
     # Cleanup
     if progress_file.exists():

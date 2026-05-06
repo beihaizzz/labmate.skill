@@ -14,11 +14,34 @@ except ImportError:
     HAS_SCHEMAS = False
     ProgressState = None
 
-PROGRESS_FILE = ".lab-report/progress.json"
+def _get_working_dir(base_path: Path = Path.cwd()) -> str:
+    """Determine working directory, checking config first then falling back.
+    
+    Priority:
+    1. Read working_dir from .labmate/config.json if it exists
+    2. Return ".labmate" if .labmate/ directory exists
+    3. Return ".lab-report" if .lab-report/ directory exists
+    4. Default: ".labmate"
+    """
+    labmate_config = base_path / ".labmate" / "config.json"
+    if labmate_config.exists():
+        try:
+            config = json.loads(labmate_config.read_text(encoding='utf-8'))
+            if "working_dir" in config:
+                return config["working_dir"]
+        except (json.JSONDecodeError, IOError):
+            pass
+    
+    if (base_path / ".labmate").exists():
+        return ".labmate"
+    if (base_path / ".lab-report").exists():
+        return ".lab-report"
+    return ".labmate"
 
 def get_progress_path() -> Path:
     """Get the path to progress.json."""
-    return Path(PROGRESS_FILE)
+    working_dir = _get_working_dir()
+    return Path(working_dir) / "progress.json"
 
 def load_progress() -> dict:
     """Load progress from file or return default."""

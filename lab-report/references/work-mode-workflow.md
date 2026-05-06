@@ -18,7 +18,7 @@ Work Mode is the second mode, activated after Guide Mode completes (or directly 
 
 ## Step 1: Detect Existing Progress
 
-Check for `.lab-report/progress.json`:
+Check for `.labmate/progress.json`（旧项目兼容 `.labmate/`）:
 
 ```bash
 python scripts/progress_manager.py
@@ -89,7 +89,7 @@ Rules:
 - **Never infer** grade/class/year without user confirmation
 - Show the raw data from `学生信息.md` exactly as-is
 - If any field seems ambiguous (e.g., "计科1班" — which year?), flag it as `⚠️ 待确认`
-- After user confirms, save to `.lab-report/config.json` so subsequent runs skip re-asking
+- After user confirms, save to `.labmate/config.json` so subsequent runs skip re-asking
 
 ### Example prompt:
 
@@ -106,7 +106,7 @@ Rules:
 2）normal（标准报告：内容完整规范，日常使用首选）
 ```
 
-Save confirmed metadata to `.lab-report/config.json` for reuse across re-generations.
+Save confirmed metadata to `.labmate/config.json` for reuse across re-generations.
 
 ---
 
@@ -191,7 +191,7 @@ python scripts/inspect_template.py --input path/to/template.docx --format human
 
 Also save the JSON for the fill script:
 ```bash
-python scripts/inspect_template.py --input path/to/template.docx --format json > .lab-report/template-inspect.json
+python scripts/inspect_template.py --input path/to/template.docx --format json > .labmate/template-inspect.json
 ```
 
 ### What the inspect output tells you
@@ -230,7 +230,7 @@ If the template has NO `{{placeholder}}` syntax (most university templates use f
 ```bash
 uv run --with python-docx python scripts/auto_prepare_template.py \
   --input template.docx \
-  --output .lab-report/prepared_template.docx
+  --output .labmate/prepared_template.docx
 ```
 
 This script:
@@ -257,9 +257,9 @@ Each placeholder maps to one of three data sources:
 
 | Source | Fields | How to obtain |
 |--------|--------|---------------|
-| **实验指导书原文（优先）** | 实验目的, 实验原理, 实验器材, 实验要求 | `parse_pdf.py` / `.lab-report/guide-content.json` |
+| **实验指导书原文（优先）** | 实验目的, 实验原理, 实验器材, 实验要求 | `parse_pdf.py` / `.labmate/guide-content.json` |
 | Student info | 姓名, 学号, 学院, 专业, 班级 | `scripts/student_info.py` |
-| Experiment progress | 实验名称, 实验步骤, 实验数据 | `.lab-report/progress.json` |
+| Experiment progress | 实验名称, 实验步骤, 实验数据 | `.labmate/progress.json` |
 | Student description | 实验结果, 实验结论 (仅在以上来源无覆盖时) | Ask the student |
 
 ### Mapping Table
@@ -339,7 +339,7 @@ Use the information extracted from photos to make report content accurate:
 
 ### Image Placeholder Insertion
 
-After analysis, create an image placeholder instruction file (`.lab-report/image-placeholders.json`) so `fill_template.py` can mark where photos should go:
+After analysis, create an image placeholder instruction file (`.labmate/image-map.json`) so `fill_template.py` can mark where photos should go:
 
 ```json
 [
@@ -374,23 +374,27 @@ glob("**/*.jpg"); glob("**/*.png"); glob("**/screenshots/*"); glob("**/实验照
   {"match": "实验现象", "path": null,                    "caption": "此处插入LED流水灯照片"}
 ]
 ```
-- `match`: Text in a paragraph to find insertion point
+- `match`: Text in a paragraph to find insertion point (text-match format, 旧格式)
 - `path`: Image path. **null** → styled placeholder `[此处插入照片]`
 - `caption`: Image caption or placeholder label
+
+`--images` 支持两种格式：
+- **text-match 格式**（旧）: `[{"match": "实验步骤", "path": "...", "caption": "..."}]` — 按段落文本匹配插入点
+- **section+offset 格式**（新）: `[{"section": "实验步骤", "offset": 0, "path": "...", "caption": "..."}]` — 按章节标题+偏移量定位，更稳定
 
 #### Fill with images
 ```bash
 python scripts/fill_template.py \
   -t template.docx -d data.json -o output.docx \
   --inspect inspect.json \
-  --images .lab-report/image-config.json
+  --images .labmate/image-config.json
 ```
 
 **Result**: Valid images → centered, 5.2in wide, caption below. Missing → grey italic placeholder.
 
 ---
 
-Create a JSON file (e.g., `.lab-report/template-data.json`) with all required fields:
+Create a JSON file (e.g., `.labmate/template-data.json`) with all required fields:
 
 ```json
 {
@@ -432,8 +436,8 @@ When generating content for placeholders from student descriptions or guide cont
 ```bash
 python scripts/fill_template.py \
   --template path/to/template.docx \
-  --data .lab-report/template-data.json \
-  --inspect .lab-report/template-inspect.json \
+  --data .labmate/template-data.json \
+  --inspect .labmate/template-inspect.json \
   --output output/实验报告.docx \
   --style normal
 ```
@@ -601,7 +605,7 @@ python scripts/git_manager.py --commit --message "生成实验报告"
 After generating the report, verify its structural integrity:
 
 ```bash
-python scripts/validate_docx.py --input output.docx --inspect .lab-report/template-inspect.json
+python scripts/validate_docx.py --input output.docx --inspect .labmate/template-inspect.json
 ```
 
 The validator checks:
@@ -643,7 +647,7 @@ python scripts/student_info.py --json
 
 # ⭐ MANDATORY: Inspect template before fill
 python scripts/inspect_template.py --input template.docx --format human
-python scripts/inspect_template.py --input template.docx --format json > .lab-report/template-inspect.json
+python scripts/inspect_template.py --input template.docx --format json > .labmate/template-inspect.json
 
 # Auto-prepare template (inject placeholders)
 python scripts/auto_prepare_template.py \
@@ -662,18 +666,18 @@ python scripts/parse_docx.py --input template.docx
 # Fill template with inspect data
 python scripts/fill_template.py \
   -t template.docx \
-  -d .lab-report/template-data.json \
-  --inspect .lab-report/template-inspect.json \
+  -d .labmate/template-data.json \
+  --inspect .labmate/template-inspect.json \
   -o output.docx --style normal
 
 # Fill template (perfect style)
 python scripts/fill_template.py \
-  -t template.docx -d .lab-report/template-data.json \
-  --inspect .lab-report/template-inspect.json \
+  -t template.docx -d .labmate/template-data.json \
+  --inspect .labmate/template-inspect.json \
   -o output.docx --style perfect
 
 # Validate generated report (optional)
-python scripts/validate_docx.py --input output.docx --inspect .lab-report/template-inspect.json
+python scripts/validate_docx.py --input output.docx --inspect .labmate/template-inspect.json
 
 # Git — 默认仅报告（文件保留在 Changes 面板）
 python scripts/git_manager.py

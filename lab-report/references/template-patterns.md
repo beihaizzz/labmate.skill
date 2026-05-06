@@ -1,12 +1,12 @@
 # Template Patterns Reference
 
-How to create and use DOCX templates with the lab-report skill. Covers placeholder syntax, common field names, table layouts, CJK font handling, and document structure.
+How to create and use DOCX templates with the LabMate skill. Covers placeholder syntax, common field names, table layouts, CJK font handling, and document structure.
 
 ---
 
 ## Placeholder Syntax
 
-The lab-report skill uses **Jinja2** template syntax, processed by `docxtpl` (which wraps `python-docx`).
+LabMate uses **Jinja2** template syntax, processed by `docxtpl` (which wraps `python-docx`).
 
 ### Standard Placeholder
 

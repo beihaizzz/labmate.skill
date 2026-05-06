@@ -15,7 +15,7 @@ except ImportError:
     HAS_DOCX = False
 
 
-def validate(input_path: Path, inspect_data: dict = None, strict: bool = False) -> dict:
+def validate(input_path: Path, inspect_data: dict = None, strict: bool = False, image_config_path: str = None) -> dict:
     """Validate a generated DOCX report. Returns check results."""
     if not HAS_DOCX:
         return {"valid": False, "checks": [], "warnings": ["Missing dependency: python-docx"]}
@@ -108,7 +108,47 @@ def validate(input_path: Path, inspect_data: dict = None, strict: bool = False) 
     if result["warnings"] and strict:
         result["valid"] = False
 
+    # Check 5: Image insertion
+    if image_config_path:
+        check = _check_image_insertion(doc, image_config_path)
+        result["checks"].append(check)
+        if check["status"] == "WARN" and strict:
+            result["valid"] = False
+
     return result
+
+
+def _check_image_insertion(doc, image_config_path: str) -> dict:
+    """Verify all configured images were inserted into the document."""
+    try:
+        with open(image_config_path, 'r', encoding='utf-8') as f:
+            configs = json.load(f)
+    except Exception:
+        return {"name": "image_insertion", "status": "SKIP", "detail": "Cannot read image config"}
+
+    total = len(configs)
+    matched = []
+    unmatched = []
+
+    for cfg in configs:
+        caption = cfg.get("caption", "")
+        found = False
+        for p in doc.paragraphs:
+            if caption and caption in p.text:
+                found = True
+                break
+        if found:
+            matched.append(caption)
+        else:
+            unmatched.append(cfg.get("path", "unknown"))
+
+    if unmatched and total > 0:
+        return {
+            "name": "image_insertion",
+            "status": "WARN",
+            "detail": f"{len(matched)}/{total} images matched, unmatched: {unmatched}"
+        }
+    return {"name": "image_insertion", "status": "PASS", "detail": f"All {total} images matched"}
 
 
 def main():
@@ -116,6 +156,7 @@ def main():
     parser.add_argument('--input', '-i', required=True, help='Generated DOCX report')
     parser.add_argument('--inspect', help='Inspect JSON from inspect_template.py')
     parser.add_argument('--strict', action='store_true', help='Fail on warnings too')
+    parser.add_argument('--images', help='Image config JSON (image-config.json) for insertion verification')
     args = parser.parse_args()
 
     input_path = Path(args.input)
@@ -130,7 +171,8 @@ def main():
             with open(inspect_path, 'r', encoding='utf-8') as f:
                 inspect_data = json.load(f)
 
-    result = validate(input_path, inspect_data, args.strict)
+    image_config_path = args.images
+    result = validate(input_path, inspect_data, args.strict, image_config_path)
 
     print(json.dumps(result, indent=2, ensure_ascii=False))
     sys.exit(0 if result["valid"] else 1)

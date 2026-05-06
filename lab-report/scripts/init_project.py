@@ -7,6 +7,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+DEFAULT_WORKING_DIR = ".labmate"
+
 # Import other scripts
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -118,9 +120,9 @@ def _detect_embedded_template(filepath: Path) -> dict | None:
     return None
 
 
-def _save_config(directory: Path, data: dict):
-    """保存配置到 .lab-report/config.json"""
-    config_dir = directory / ".lab-report"
+def _save_config(directory: Path, data: dict, working_dir: str = DEFAULT_WORKING_DIR):
+    """保存配置到 working_dir/config.json"""
+    config_dir = directory / working_dir
     config_dir.mkdir(exist_ok=True)
     config_file = config_dir / "config.json"
     existing = {}
@@ -214,14 +216,14 @@ def init_project(directory: Path, use_git: bool = False, experiment_name: str = 
             result["discovered_files"]["templates_embedded"].append(file.name)
     
     if result["embedded_templates"]:
-        _save_config(directory, {"embedded_templates": result["embedded_templates"]})
-    
+        _save_config(directory, {"embedded_templates": result["embedded_templates"]}, working_dir)
+
     if not any(result["discovered_files"].values()):
         result["errors"].append("No course materials found in directory")
         result["success"] = False
         return result
-    
-    # 3. Check student info
+
+    # 4. Check student info
     try:
         from student_info import find_student_info
         info_path, info_data = find_student_info(directory)
@@ -232,12 +234,20 @@ def init_project(directory: Path, use_git: bool = False, experiment_name: str = 
         }
     except Exception as e:
         result["errors"].append(f"Student info check failed: {e}")
+
+    # 5. Determine working directory: use existing .lab-report/ if present, else .labmate/
+    if (directory / ".lab-report").exists():
+        working_dir = ".lab-report"
+    else:
+        working_dir = DEFAULT_WORKING_DIR
+
+    lab_dir = directory / working_dir
+    lab_dir.mkdir(parents=True, exist_ok=True)
+
+    # Save working_dir to config
+    _save_config(directory, {"working_dir": working_dir}, working_dir)
     
-    # 4. Create .lab-report directory
-    lab_report_dir = directory / ".lab-report"
-    lab_report_dir.mkdir(exist_ok=True)
-    
-    # 5. Initialize progress if experiment name provided
+    # 6. Initialize progress if experiment name provided
     if experiment_name:
         try:
             # Count steps from PDF if available
@@ -251,7 +261,7 @@ def init_project(directory: Path, use_git: bool = False, experiment_name: str = 
         except Exception as e:
             result["errors"].append(f"Progress init failed: {e}")
     
-    # 6. Initialize git if requested
+    # 7. Initialize git if requested
     if use_git:
         try:
             git_dir = directory / ".git"
