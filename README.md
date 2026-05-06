@@ -12,7 +12,7 @@
 </table>
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.1.0-blue)](https://github.com/beihaizzz/labmate.skill)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue)](https://github.com/beihaizzz/labmate.skill)
 
 ## For Human 🧑‍🎓
 
@@ -90,7 +90,8 @@ rm -rf ~/.claude/skills/lab/.venv ~/.claude/skills/lab/__pycache__ ~/.claude/ski
 | `/lab -work` | Work Mode — 生成实验报告 |
 | `/lab -guide` | Guide Mode — 指导完成实验 |
 | `/lab -update` | 重新扫描文件 |
-| `/lab -feedback` | 生成反馈报告，提交issue帮助我们优化 |
+| `/lab -feedback` | 生成归因反馈报告（只归因，不建议） |
+| `/lab -fix` | 精确修改报告某一段落（如 /lab -fix 实验原理_2 "新内容"） |
 | `/lab -help` | 帮助，快速查询labmate功能 |
 
 ### 🚀 扩展能力 — MCP
