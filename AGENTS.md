@@ -21,45 +21,50 @@ LabMate 做三件事来纠正它：
 
 ---
 
-**生成时间:** 2026-04-25
-**最新提交:** `88eff9c`  新增通用实验报告模板
+**生成时间:** 2026-05-04
+**最新提交:** 适配 v1.2.0
 **分支:** main
-**文件数:** 56 (不含 venv/cache)
+**文件数:** 80+ (不含 venv/cache)
 
 ## OVERVIEW
 
-lab-report.skill — OpenCode Skill，用 Python 脚本 + Markdown 工作流文档的形式帮助大学生完成实验报告。两种模式：Guide Mode（指导完成实验）和 Work Mode（生成报告）。
+LabMate skill — 兼容 OpenCode / Claude Code / Cursor 等 AI 编程助手，用 Python 脚本 + Markdown 工作流文档的形式帮助大学生完成实验报告。两种模式：Guide Mode（指导完成实验）和 Work Mode（生成报告）。支持 visual model 可获得更好的图片分析体验。
 
 ## STRUCTURE
 
 ```
-lab-report/                         # OpenCode Skill 包（skill 安装点）
+lab-report/                         # LabMate Skill 包
 ├── SKILL.md                        # 主入口（YAML frontmatter + 使用说明）
 ├── pyproject.toml                  # uv 项目配置
 ├── assets/
-│   ├── report_template.docx        # 通用实验报告模板（27个{{placeholder}}）
-│   └── 学生信息模板.md              # 学生信息模板
-├── scripts/                        # 全部 Python 脚本
-│   ├── fill_template.py            # 模板填充（支持 placeholder + 直填模式）
-│   ├── fill_utils.py               # 格式化工具库（常量/字体/段落/对齐/合并单元格）
-│   ├── inspect_template.py         # 模板格式前置分析（Run级 font/size/bold/eastAsia/align）
+│   ├── report_template.docx        # 通用实验报告模板
+│   └── 学生信息模板.md
+├── scripts/                        # 核心 Python 脚本（17个）
+│   ├── fill_template.py            # 模板填充（placeholder/直填/角色模式）
+│   ├── fill_utils.py               # 格式化工具库
+│   ├── inspect_template.py         # 模板格式前置分析
+│   ├── auto_prepare_template.py    # 自动注入 {{placeholder}}（v1.0.0）
+│   ├── extract_template.py         # 成品报告反推模板结构
+│   ├── role_aliases.py             # 共享角色映射 + 标签检测
+│   ├── section_map.py              # 段落映射表生成（v1.2.0）
+│   ├── validate_docx.py            # DOCX 结构验证（v1.1.0）
 │   ├── init_project.py             # 项目初始化编排
-│   ├── parse_pdf.py                # PDF文本提取 + pymupdf4llm Markdown（含降级）
-│   ├── parse_docx.py               # DOCX解析 + .doc自动转换（LibreOffice）
-│   ├── parse_pptx.py               # PPTX文本提取
-│   ├── progress_manager.py         # JSON进度管理（含debug_history）
-│   ├── student_info.py             # 学生信息.md发现/创建
-│   ├── git_manager.py              # Git管理（--init/默认stage-only/--commit）
-│   └── check_deps.py               # 依赖预检（uv/Python/packages）
-├── references/                     # AI agent参考文档
-│   ├── guide-mode-workflow.md      # Guide Mode完整工作流
-│   ├── work-mode-workflow.md       # Work Mode完整工作流 + 附录
-│   ├── template-patterns.md        # DOCX模板模式 + CJK字体
-│   ├── de-ai-style-guide.md        # 去AI味写作规范
-│   ├── report-structure.md         # 实验报告标准结构
-│   └── schemas.md                  # JSON数据结构定义
-└── tests/                          # pytest 27 tests, 8文件
-    └── fixtures/                   # 测试用PDF/DOCX/PPTX
+│   ├── parse_pdf.py                # PDF（含 OCR 扫描件支持）
+│   ├── parse_docx.py               # DOCX 解析
+│   ├── parse_pptx.py               # PPTX（markitdown，v1.1.0）
+│   ├── progress_manager.py         # JSON 进度管理
+│   ├── student_info.py             # 学生信息发现/创建
+│   ├── git_manager.py              # Git 管理
+│   └── check_deps.py               # 依赖预检
+├── references/                     # AI agent 参考文档
+│   ├── guide-mode-workflow.md
+│   ├── work-mode-workflow.md
+│   ├── template-patterns.md
+│   ├── de-ai-style-guide.md
+│   ├── report-structure.md
+│   └── schemas.md
+└── tests/                          # pytest 39 tests, 10 文件
+    └── fixtures/
 ```
 
 ## WHERE TO LOOK
@@ -71,6 +76,9 @@ lab-report/                         # OpenCode Skill 包（skill 安装点）
 | 修改工作流 | `references/*-mode-workflow.md` | 先改引用文档，再改脚本 |
 | 修改进度协议 | `references/schemas.md` + `scripts/progress_manager.py` | Schema和实现必须同步 |
 | 修改通用模板 | `scripts/generate_universal_template.py` | 运行此脚本生成 .docx |
+| 自动准备模板 | `scripts/auto_prepare_template.py` | 无占位符模板自动注入 |
+| 生成段落映射 | `scripts/section_map.py` | /lab -fix 依赖 |
+| 验证报告 | `scripts/validate_docx.py` | 生成后检查 |
 | 发版前检查 | `tests/` | `uv run --with <pkgs> pytest lab-report/tests/ -v` |
 
 ## CONVENTIONS
@@ -81,6 +89,7 @@ lab-report/                         # OpenCode Skill 包（skill 安装点）
 - **文件修改**: 原始文件永远是只读的 — 所有操作在 `shutil.copy` 的副本上进行
 - **占位符格式**: `{{字段名}}` Jinja2 语法
 - **学生信息**: `学生信息.md` 格式 `key: value`，向上搜索最多3层目录
+- **工作目录**: 新项目默认 `.labmate/`，旧项目 `.lab-report/` 仍兼容
 
 ## ANTI-PATTERNS (本项目的硬规则)
 
@@ -89,8 +98,8 @@ lab-report/                         # OpenCode Skill 包（skill 安装点）
 | `as any` / `@ts-ignore` | TypeScript不适用，Python中同理不要用 bare except |
 | 修改原始模板文件 | 所有操作 `shutil.copy` 到副本 |
 | 编造实验数据 | 只填入用户提供的数据 |
-| 支持 .doc 格式 | v1 仅 .docx（通过 LibreOffice 转换） |
-| OCR | v1 不做，扫描PDF仅警告 |
+| 支持 .doc 格式 | 通过 LibreOffice 自动转换 |
+| OCR | v1.2.0 已支持 --ocr 标志，扫描 PDF 可降级提取 |
 | LaTeX / pydantic | 不做，保持轻量 |
 | SKILL.md > 5000词 | 详细流程放 references/ |
 | 硬编码字体/字号 | 用 `fill_utils.py` 常量，或者 inspect 数据 |
@@ -105,14 +114,15 @@ lab-report/                         # OpenCode Skill 包（skill 安装点）
 - **Git 默认仅 stage**: 文件出现在 OpenCode 审查侧边栏，用户手动 commit。加 `--commit` 跳过审查
 - **去AI味默认化**: 所有输出默认融入去AI味（无首先其次最后、分段叙述）
 - **风格定义注意**: `normal`=标准报告90+分（日常首选），`perfect`=极尽详尽（特殊场景）。注意不要反
+- **/lab -fix 精确重写**: 用户指定逻辑ID修改单个单元格，不影响其他内容
 
 ## COMMANDS
 
 ```bash
 # 测试
 uv run --with python-docx --with docxtpl --with pdfplumber \
-       --with pymupdf4llm --with python-pptx \
-       pytest lab-report/tests/ -v
+       --with pymupdf4llm --with markitdown \
+       --directory lab-report pytest -v
 
 # 模板分析
 uv run --with python-docx python lab-report/scripts/inspect_template.py \
@@ -125,6 +135,18 @@ uv run --with python-docx --with docxtpl python lab-report/scripts/fill_template
 # 模板填充（直填模式）
 uv run --with python-docx python lab-report/scripts/fill_template.py \
   -t template.docx --cells cells.json -o output.docx
+
+# 自动准备模板
+uv run --with python-docx python lab-report/scripts/auto_prepare_template.py \
+  --input blank_template.docx --output prepared.docx
+
+# 段落映射
+uv run --with python-docx python lab-report/scripts/section_map.py \
+  --input report.docx --output section-map.json
+
+# 报告验证
+uv run --with python-docx python lab-report/scripts/validate_docx.py \
+  --input report.docx --inspect inspect.json
 
 # Git 初始化
 uv run python lab-report/scripts/git_manager.py --init
