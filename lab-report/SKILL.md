@@ -48,7 +48,11 @@ metadata:
 
 **扩展能力**：部分实验类型（如 Unity、STM32 开发）可以通过 **MCP 扩展** 让 LabMate 直接操作实验环境和设备，突破"只能写文档"的边界。查看你的实验类型是否支持 MCP 集成。
 
-**Current version: v1.2.1**
+**Current version: v1.2.2**
+- **New**: 新增 ASCII 连续字符检测 (`detect_long_ascii_block`) + 生成后验证 (`long_line_check`) 防止 Word 表格溢出
+- **New**: 新增诊断指南 (`troubleshooting.md`)、代码格式规则 (`de-ai-style-guide.md`)、scope control / 工具复用流程约束
+
+**Previous version: v1.2.1**
 - **Guide Mode**: AI reads your experiment guide (PDF/DOCX/PPTX/markitdown), shows all steps, tracks your progress via `.labmate/progress.json`（旧项目使用 `.lab-report/` 也兼容）, reminds you to take screenshots at key points, and provides step-by-step help when stuck. Say "继续" to sync progress.
 - **Work Mode**: AI reads your report template (DOCX with `{{placeholders}}`), extracts experiment content from Guide Mode progress OR your description, fills the template using docxtpl, and generates a new Word file. Original template is NEVER modified.
 

@@ -57,6 +57,13 @@ Before asking any questions, check if `project.md` exists in the project root. I
 
 ---
 
+> **⚠️ Scope Control — 确认本次操作范围**
+> 
+> 如果项目包含多个实验（如 project.md 中有多个实验配置），在填充模板前必须用 `question` 工具确认用户本次只修改哪个实验的报告。
+> 绝不未经用户明确授权就修改其他实验的文件。每次填充前重复此确认。
+
+---
+
 ## Step 1.5: Confirm Experiment Metadata (fix 1.1)
 
 **Before generating content, actively ask the student for experimental metadata** using the `question` tool.
@@ -193,6 +200,14 @@ Also save the JSON for the fill script:
 ```bash
 python scripts/inspect_template.py --input path/to/template.docx --format json > .labmate/template-inspect.json
 ```
+
+> **⚠️ 必须保存 JSON 输出** 
+> 
+> 运行 inspect_template 后必须将 JSON 输出重定向保存到 `.labmate/template-inspect.json`：
+> ```
+> python scripts/inspect_template.py --input template.docx --format json > .labmate/template-inspect.json
+> ```
+> 不可仅在终端查看后丢弃。后续 fill_template.py 和 validate_docx.py 均需要此文件。
 
 ### What the inspect output tells you
 
@@ -457,6 +472,13 @@ When generating content for placeholders from student descriptions or guide cont
 ## Step 6: Fill the Template
 
 **Always pass the inspect JSON** so the script preserves labels and uses correct formatting:
+
+> **⚠️ 工具复用规则（禁止自写填充代码）**
+> 
+> AI 必须使用 `fill_utils` 中已有的函数，禁止自写临时代码：
+> - 单元格填充用 `fill_utils.fill_cell_safe()` — 禁止 `cell.paragraphs[0].clear()` + `add_run()`
+> - 图片插入用 `fill_utils.insert_image_or_placeholder()` — 禁止 `cell.add_paragraph()` + `run.add_picture()`
+> - 正文段落写入用 `fill_utils.add_chinese_body_para()`
 
 ```bash
 python scripts/fill_template.py \
