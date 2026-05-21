@@ -279,3 +279,53 @@ def insert_image_or_placeholder(para, image_path: str | None = None,
     run.italic = True
     run.font.color.rgb = None
     return False
+
+
+# ── 长ASCII段落检测 ────────────────────────────────────────────────────────────────────
+
+def detect_long_ascii_block(text: str, threshold: int = 50) -> dict:
+    """检测连续ASCII字符块（可能造成Word表格单元格溢出）。
+
+    Args:
+        text: 待检测文本
+        threshold: 连续ASCII字符阈值，默认50
+
+    Returns:
+        {"has_issue": bool, "segments": [{"start": int, "end": int, "text": str}]}
+    """
+    URL_PROTOCOLS = ("http://", "https://", "ftp://", "data:")
+    segments = []
+
+    for m in re.finditer(r'[\x21-\x7e]+', text):
+        raw_segment = m.group()
+        block_start = m.start()
+
+        # 以空格为分隔符，分割ASCII块，逐段检查
+        sub_segments = raw_segment.split(" ")
+        sub_pos = 0
+
+        for sub in sub_segments:
+            sub_start_in_block = raw_segment.index(sub, sub_pos)
+            sub_end_in_block = sub_start_in_block + len(sub)
+            sub_start = block_start + sub_start_in_block
+            sub_end = block_start + sub_end_in_block
+            sub_pos = sub_end_in_block + 1  # +1 to skip the space
+
+            if not sub:
+                continue
+
+            # 跳过URL协议开头的段落
+            if sub.startswith(URL_PROTOCOLS):
+                continue
+
+            # 跳过包含路径分隔符的段落（文件路径）
+            if "/" in sub or "\\" in sub:
+                continue
+
+            # 跳过长度小于阈值的段落
+            if len(sub) < threshold:
+                continue
+
+            segments.append({"start": sub_start, "end": sub_end, "text": sub})
+
+    return {"has_issue": len(segments) > 0, "segments": segments}

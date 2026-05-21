@@ -30,3 +30,37 @@
 
 ### 学生风格（✅）
 准备好实验器材后，我们按照电路图一步步搭建了实验电路。连接过程中特别注意了正负极的对应关系。接好之后打开电源，用万用表测量了几个关键节点的电压，把数据记在了表格里。和理论值一对比，误差在可接受的范围内。
+
+## 代码段落格式
+
+### 原因
+Word 对连续无空格 ASCII 字符串（如紧凑 C 代码）视为不可拆分"单词"，当长度超过单元格可用宽度时，会撑开整个表格导致溢出页面。
+
+### 规则
+- **强制多行缩进**：所有嵌入报告的代码（C、Python、汇编等）必须写成多行缩进格式
+- **token 间空格**：操作符、括号、逗号后必须有空格（如 `GPIO_Pin_0) == 0` 不能写成 `GPIO_Pin_0)==0`）
+- **禁止紧凑单行**：禁止将多行代码压缩成一行
+
+### 错误写法（❌）
+```c
+if(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_0)==0){delay_ms(20);if(...==0){while(...==0){WWDG_Set_Counter(0x7F);delay_ms(5);}}}
+```
+
+### 正确写法（✅）
+```c
+if (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == 0) {
+    delay_ms(20);
+    if (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == 0) {
+        while (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == 0) {
+            WWDG_Set_Counter(0x7F);
+            delay_ms(5);
+        }
+        WWDG_Set_Counter(0x7F);
+        GPIO_SetBits(GPIOC, GPIO_Pin_4);
+    }
+}
+```
+
+### 自动化检测
+`fill_utils.detect_long_ascii_block(text, threshold=50)` 可检测连续 ≥50 字符无空格 ASCII 段落。
+`validate_docx.py` 的 `long_line_check` 可在报告生成后检出 ≥200 字符的长行。
