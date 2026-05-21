@@ -7,12 +7,52 @@ import re
 import sys
 from pathlib import Path
 
+# Add scripts dir to path for fill_utils import
+sys.path.insert(0, str(Path(__file__).parent))
+import fill_utils
+
 try:
     from docx import Document
     from docx.oxml.ns import qn
     HAS_DOCX = True
 except ImportError:
     HAS_DOCX = False
+
+
+def _check_long_lines(doc, threshold: int = 200) -> dict:
+    """Detect runs with >threshold continuous ASCII characters in paragraphs and table cells."""
+    total_issues = 0
+    locations = []
+
+    # Scan paragraphs
+    for p_idx, para in enumerate(doc.paragraphs):
+        for run in para.runs:
+            result = fill_utils.detect_long_ascii_block(run.text, threshold=threshold)
+            if result["has_issue"]:
+                total_issues += len(result["segments"])
+                locations.append(f"para[{p_idx}]")
+
+    # Scan table cells
+    for t_idx, table in enumerate(doc.tables):
+        for r_idx, row in enumerate(table.rows):
+            for c_idx, cell in enumerate(row.cells):
+                for run in cell.paragraphs:
+                    for r in run.runs:
+                        result = fill_utils.detect_long_ascii_block(r.text, threshold=threshold)
+                        if result["has_issue"]:
+                            total_issues += len(result["segments"])
+                            locations.append(f"table[{t_idx}]R{r_idx}C{c_idx}")
+
+    if total_issues > 0:
+        loc_str = ", ".join(locations[:5])
+        if len(locations) > 5:
+            loc_str += f" (+{len(locations) - 5} more)"
+        return {
+            "name": "long_line_check",
+            "status": "WARN",
+            "detail": f"Found {total_issues} long ASCII run(s) at {loc_str}"
+        }
+    return {"name": "long_line_check", "status": "PASS", "detail": "No long ASCII runs found"}
 
 
 def validate(input_path: Path, inspect_data: dict = None, strict: bool = False, image_config_path: str = None) -> dict:
@@ -114,6 +154,10 @@ def validate(input_path: Path, inspect_data: dict = None, strict: bool = False, 
         result["checks"].append(check)
         if check["status"] == "WARN" and strict:
             result["valid"] = False
+
+    # Check 6: Long line check (table overflow prevention)
+    long_line_check = _check_long_lines(doc)
+    result["checks"].append(long_line_check)
 
     return result
 
