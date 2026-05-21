@@ -12,7 +12,7 @@
 </table>
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.2.0-blue)](https://github.com/beihaizzz/labmate.skill)
+[![Version](https://img.shields.io/badge/version-1.2.2-blue)](https://github.com/beihaizzz/labmate.skill)
 
 ## For Human 🧑‍🎓
 
@@ -21,7 +21,7 @@
 把这段话发给 Claude Code 或 OpenCode，AI 会自动完成安装：
 
 ```
-请帮我安装 LabMate skill（版本 v1.1.0），这是一个帮助大学生完成实验报告的工具。
+请帮我安装 LabMate skill（版本 v1.2.2），这是一个帮助大学生完成实验报告的工具。
 
 安装方法：
 1. `git clone https://github.com/beihaizzz/labmate.skill.git` 克隆仓库到任意位置

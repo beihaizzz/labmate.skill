@@ -22,9 +22,29 @@ LabMate 做三件事来纠正它：
 ---
 
 **生成时间:** 2026-05-04
-**最新提交:** 适配 v1.2.0
+**最新提交:** 适配 v1.2.2
 **分支:** main
 **文件数:** 80+ (不含 venv/cache)
+
+## VERSION INDEX
+
+> **升级版本时**：修改以下所有位置。SKILL.md 是权威源，其余位置与它同步。
+
+| 文件 | 行号 | 类型 | 说明 |
+|------|------|------|------|
+| `lab-report/SKILL.md` | 51 | **权威源** | `**Current version: v{version}**` |
+| `lab-report/SKILL.md` | 55 | 辅助 | `**Previous version: v{old}**` |
+| `README.md` | 15 | 同步 | badge `version-{version}` |
+| `README.md` | 24 | 同步 | 安装提示中的版本号 |
+| `AGENTS.md` | 25 | 同步 | `**最新提交:** 适配 v{version}` |
+
+> **历史标记（升级时不需要改）**：以下位置记录功能首次引入的版本，保留原值。
+
+| 文件 | 行号 | 内容 |
+|------|------|------|
+| `AGENTS.md` | 49 | 段落映射表生成（v1.2.0） |
+| `AGENTS.md` | 102 | OCR v1.2.0 已支持 |
+| `lab-report/references/schemas.md` | 173 | Issues Array 新增字段（v1.2.1） |
 
 ## OVERVIEW
 
